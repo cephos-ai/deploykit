@@ -1,0 +1,157 @@
+{
+  "name": "deploykit - occurrence digest",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## deploykit - weekly occurrence digest\n\nEvery Monday 09:00: counts the `[occurrence]` comments filed by the triage core over the last week, ranks issues by how often they recurred, and posts the top 10 to Slack. This is the prioritization signal - no labels, no priority mutation, just visible counts.\n\n**Setup:**\n1. Attach your **Linear** credential on `Fetch Occurrence Comments`.\n2. Pick the destination channel on `Post Digest` and attach your **Slack** credential.\n3. Activate.\n\nPosts nothing on quiet weeks.",
+        "height": 340,
+        "width": 400
+      },
+      "id": "44444444-4444-4444-8444-444444444400",
+      "name": "Setup Notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-60, -400]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks",
+              "weeksInterval": 1,
+              "triggerAtDay": [1],
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      },
+      "id": "44444444-4444-4444-8444-444444444401",
+      "name": "Every Monday",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.linear.app/graphql",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "linearApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ query: \"query Occurrences($first: Int) { comments(first: $first, filter: { body: { contains: \\\"[occurrence]\\\" }, createdAt: { gt: \\\"-P1W\\\" } }) { nodes { id body createdAt issue { id identifier title url } } } }\", variables: { first: 250 } }) }}",
+        "options": {}
+      },
+      "id": "44444444-4444-4444-8444-444444444402",
+      "name": "Fetch Occurrence Comments",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [220, 0],
+      "credentials": {
+        "linearApi": {
+          "id": "CONFIGURE_ME",
+          "name": "Linear account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const nodes = ($json.data && $json.data.comments && $json.data.comments.nodes) || [];\nconst byIssue = {};\n\nfor (const c of nodes) {\n  if (!c.issue) continue;\n  const k = c.issue.id;\n  if (!byIssue[k]) {\n    byIssue[k] = { identifier: c.issue.identifier, title: c.issue.title, url: c.issue.url, count: 0, deployments: new Set() };\n  }\n  byIssue[k].count += 1;\n  const m = (c.body || '').match(/deployment:\\s*([^·\\n]+)/);\n  if (m) byIssue[k].deployments.add(m[1].trim());\n}\n\nreturn Object.values(byIssue)\n  .sort((a, b) => b.count - a.count)\n  .slice(0, 10)\n  .map((i, idx) => ({\n    json: {\n      rank: idx + 1,\n      identifier: i.identifier,\n      title: i.title,\n      url: i.url,\n      count: i.count,\n      deployments: [...i.deployments].join(', '),\n    },\n  }));"
+      },
+      "id": "44444444-4444-4444-8444-444444444403",
+      "name": "Rank Issues",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 0]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all().map((i) => i.json);\nif (!items.length) return [];\n\nconst lines = items.map((i) =>\n  `${i.rank}. <${i.url}|${i.identifier}> ${i.title} - *${i.count}×* this week${i.deployments ? ` (${i.deployments})` : ''}`\n);\n\nconst weekOf = new Date().toISOString().slice(0, 10);\n\nreturn [{\n  json: {\n    text: `:repeat: *Top recurring deployment issues - week of ${weekOf}*\\n\\n${lines.join('\\n')}\\n\\n_Counted from [occurrence] comments filed by deploykit triage. A bug seen once is an anomaly; these were not seen once._`,\n  },\n}];"
+      },
+      "id": "44444444-4444-4444-8444-444444444404",
+      "name": "Format Digest",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 0]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "text": "={{ $json.text }}",
+        "otherOptions": {}
+      },
+      "id": "44444444-4444-4444-8444-444444444405",
+      "name": "Post Digest",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [880, 0],
+      "credentials": {
+        "slackApi": {
+          "id": "CONFIGURE_ME",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every Monday": {
+      "main": [
+        [
+          {
+            "node": "Fetch Occurrence Comments",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Occurrence Comments": {
+      "main": [
+        [
+          {
+            "node": "Rank Issues",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rank Issues": {
+      "main": [
+        [
+          {
+            "node": "Format Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Digest": {
+      "main": [
+        [
+          {
+            "node": "Post Digest",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

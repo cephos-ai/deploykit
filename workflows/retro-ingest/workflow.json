@@ -1,0 +1,376 @@
+{
+  "name": "deploykit - retro ingest",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## deploykit - retro inlet\n\nA finished retro comes in through any of three doors and every `### Issue:` in it (plus every promoted debt entry) is triaged into Linear via the shared core.\n\n**Doors:**\n- **Form** - open the Retro Form node's URL, paste the retro. Zero extra setup.\n- **Webhook** - what the `/retro` Claude skill POSTs to (`{ customer, retro_markdown }`). Zero extra setup.\n- **GitHub** - push a `retros/*.md` file; pick owner/repo on the two GitHub nodes and add a GitHub credential. Optional.\n\n**Setup:** point *Run Issue Triage* at the imported issue-triage core, attach an OpenAI credential on the model node, activate.",
+        "height": 400,
+        "width": 420
+      },
+      "id": "33333333-3333-4333-8333-333333333300",
+      "name": "Setup Notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-60, -460]
+    },
+    {
+      "parameters": {
+        "path": "deploykit-retro-form",
+        "formTitle": "Submit a deployment retro",
+        "formDescription": "Paste a completed RETRO.md. Every issue in it will be deduplicated against the tracker and filed or +1'd.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Customer",
+              "placeholder": "acme",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Retro markdown",
+              "fieldType": "textarea",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "33333333-3333-4333-8333-333333333301",
+      "name": "Retro Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [0, -160]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "deploykit-retro",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "33333333-3333-4333-8333-333333333302",
+      "name": "Retro Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 40]
+    },
+    {
+      "parameters": {
+        "owner": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "repository": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "events": ["push"],
+        "options": {}
+      },
+      "id": "33333333-3333-4333-8333-333333333303",
+      "name": "GitHub Push",
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [0, 240],
+      "credentials": {
+        "githubApi": {
+          "id": "CONFIGURE_ME",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $json.commits ? $json : ($json.body || {});\nconst commits = payload.commits || [];\nconst files = new Set();\nfor (const c of commits) {\n  for (const f of [...(c.added || []), ...(c.modified || [])]) {\n    if (/^retros\\/.*\\.md$/.test(f)) files.add(f);\n  }\n}\nreturn [...files].map(f => ({ json: { file_path: f } }));"
+      },
+      "id": "33333333-3333-4333-8333-333333333304",
+      "name": "Changed Retro Files",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [220, 240]
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "repository": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "filePath": "={{ $json.file_path }}",
+        "asBinaryProperty": false,
+        "additionalParameters": {}
+      },
+      "id": "33333333-3333-4333-8333-333333333305",
+      "name": "Fetch Retro File",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1.1,
+      "position": [440, 240],
+      "credentials": {
+        "githubApi": {
+          "id": "CONFIGURE_ME",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map((item) => {\n  const j = item.json;\n  let customer;\n  let retro;\n\n  if (j.body && (j.body.retro_markdown || j.body.customer)) {\n    // webhook: POST { customer, retro_markdown } - e.g. from the /retro skill\n    customer = j.body.customer;\n    retro = j.body.retro_markdown;\n  } else if (j['Retro markdown'] || j.Customer) {\n    // form submission\n    customer = j.Customer;\n    retro = j['Retro markdown'];\n  } else if (j.content && j.encoding === 'base64') {\n    // github file fetch (retros/YYYY-MM-DD-<customer>.md)\n    retro = Buffer.from(j.content, 'base64').toString('utf8');\n    const m = (j.path || j.name || '').match(/\\d{4}-\\d{2}-\\d{2}-(.+)\\.md$/);\n    customer = m ? m[1] : 'unknown';\n  }\n\n  return { json: { customer: customer || 'unknown', retro_markdown: retro || '' } };\n}).filter((i) => i.json.retro_markdown.length > 0);"
+      },
+      "id": "33333333-3333-4333-8333-333333333306",
+      "name": "Normalize Retro",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [680, 40]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are processing a deployment retrospective into discrete, trackable issues.\n\nCustomer/deployment: {{ $json.customer }}\nRetro document:\n<<<\n{{ $json.retro_markdown }}\n>>>\n\nExtract every distinct issue:\n- Each \"### Issue:\" block is one issue - read its fields.\n- Each Debt Log entry with verdict \"promote\" in the debt review is ALSO one issue (these are platform gaps that should become roadmap items).\n- Ignore \"what worked\" items, metrics, and decisions.\n\nFor each issue produce:\n- summary: one line, root-cause oriented.\n- system: component/integration involved, or \"unknown\".\n- times_seen: integer count from the retro (default 1).\n- severity: blocker | major | minor.\n- context: self-contained sanitized context an engineer can act on - no customer-identifying data.",
+        "hasOutputParser": true
+      },
+      "id": "33333333-3333-4333-8333-333333333307",
+      "name": "Split Into Issues",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [900, 40]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "id": "33333333-3333-4333-8333-333333333308",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [960, 280],
+      "credentials": {
+        "openAiApi": {
+          "id": "CONFIGURE_ME",
+          "name": "OpenAI account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"issues\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"summary\": { \"type\": \"string\" },\n          \"system\": { \"type\": \"string\" },\n          \"times_seen\": { \"type\": \"integer\" },\n          \"severity\": { \"type\": \"string\", \"enum\": [\"blocker\", \"major\", \"minor\"] },\n          \"context\": { \"type\": \"string\" }\n        },\n        \"required\": [\"summary\", \"context\"]\n      }\n    }\n  },\n  \"required\": [\"issues\"]\n}"
+      },
+      "id": "33333333-3333-4333-8333-333333333309",
+      "name": "Issues Schema",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [1160, 280]
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output.issues",
+        "options": {}
+      },
+      "id": "33333333-3333-4333-8333-33333333330a",
+      "name": "One Item Per Issue",
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [1180, 40]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d0000000-0000-4000-8000-000000000001",
+              "name": "source",
+              "value": "retro",
+              "type": "string"
+            },
+            {
+              "id": "d0000000-0000-4000-8000-000000000002",
+              "name": "customer",
+              "value": "={{ $('Normalize Retro').item.json.customer }}",
+              "type": "string"
+            },
+            {
+              "id": "d0000000-0000-4000-8000-000000000003",
+              "name": "raw_text",
+              "value": "={{ 'Issue: ' + $json.summary + '\\nSystem: ' + ($json.system || 'unknown') + '\\nTimes seen this deployment: ' + ($json.times_seen || 1) + '\\nSeverity: ' + ($json.severity || 'minor') + '\\nContext: ' + ($json.context || '') }}",
+              "type": "string"
+            },
+            {
+              "id": "d0000000-0000-4000-8000-000000000004",
+              "name": "reported_at",
+              "value": "={{ $now.toISO() }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "33333333-3333-4333-8333-33333333330b",
+      "name": "Build Triage Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1400, 40]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "",
+          "cachedResultName": "deploykit - issue triage (core)"
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "33333333-3333-4333-8333-33333333330c",
+      "name": "Run Issue Triage",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [1620, 40]
+    }
+  ],
+  "connections": {
+    "Retro Form": {
+      "main": [
+        [
+          {
+            "node": "Normalize Retro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retro Webhook": {
+      "main": [
+        [
+          {
+            "node": "Normalize Retro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub Push": {
+      "main": [
+        [
+          {
+            "node": "Changed Retro Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Changed Retro Files": {
+      "main": [
+        [
+          {
+            "node": "Fetch Retro File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Retro File": {
+      "main": [
+        [
+          {
+            "node": "Normalize Retro",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Retro": {
+      "main": [
+        [
+          {
+            "node": "Split Into Issues",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Split Into Issues",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Issues Schema": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Split Into Issues",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Into Issues": {
+      "main": [
+        [
+          {
+            "node": "One Item Per Issue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "One Item Per Issue": {
+      "main": [
+        [
+          {
+            "node": "Build Triage Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Triage Payload": {
+      "main": [
+        [
+          {
+            "node": "Run Issue Triage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
