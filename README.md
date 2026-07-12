@@ -27,10 +27,10 @@ That `3× (acme, globex)` is three separate reports about the same root cause, f
 | [`workflows/_shared/issue-triage`](workflows/_shared/issue-triage) | The core both inlets call: extract → sanitize → dedup → +1 or create | n8n sub-workflow |
 | [`workflows/occurrence-digest`](workflows/occurrence-digest) | Weekly top-recurring-issues digest → Slack | n8n workflow |
 | [`protocols/DEPLOY.md`](protocols/DEPLOY.md) | Deployment-debt protocol: verify first, isolate hacks to labeled branches, log why | Markdown template |
-| [`protocols/RETRO.md`](protocols/RETRO.md) | Retro template: the three metrics, debt verdicts, machine-ingestable issues | Markdown template |
+| [`protocols/RETRO.md`](protocols/RETRO.md) | Daily deployment retro: what worked today, debt verdicts, machine-ingestable issues | Markdown template |
 | [`checklists/pre-deployment.md`](checklists/pre-deployment.md) | Before you arrive / day one / before you leave | Markdown checklist |
 | [`skills/deploy-protocol`](skills/deploy-protocol) | Claude Code / Cursor enforce the DEPLOY.md protocol while you hack on-site | Agent skill + rules |
-| [`skills/retro`](skills/retro) | `/retro` interviews you post-deployment, writes the retro, submits it to the funnel | Claude Code skill |
+| [`skills/retro`](skills/retro) | `/retro` runs the daily deployment retro (interview or paste of meeting notes), writes the file, submits it to the funnel | Claude Code skill |
 
 Ships against Slack + Linear + OpenAI on n8n. Every integration point is a single node swap (Anthropic, Ollama, reaction-triggers, other trackers).
 
@@ -51,7 +51,7 @@ A ticket appears in Linear with an `[occurrence]` comment. Run it again: the sec
 
 **Just the paper (~2 min).** Copy [`DEPLOY.md`](protocols/DEPLOY.md), [`RETRO.md`](protocols/RETRO.md), and the [checklist](checklists/pre-deployment.md) into your deployment repo. Fork mercilessly, that's the point too.
 
-**Agent-native FDEs.** Drop [`skills/deploy-protocol`](skills/deploy-protocol) into `.claude/skills/` so workarounds get isolated and logged automatically, and [`skills/retro`](skills/retro) so the retro happens before the drive to the airport (it POSTs straight into [`retro-ingest`](workflows/retro-ingest)).
+**Agent-native FDEs.** Drop [`skills/deploy-protocol`](skills/deploy-protocol) into `.claude/skills/` so workarounds get isolated and logged automatically, and [`skills/retro`](skills/retro) so the retro happens at the end of each day (interview one engineer or paste the standup notes; it POSTs straight into [`retro-ingest`](workflows/retro-ingest)).
 
 ## How the pieces connect
 

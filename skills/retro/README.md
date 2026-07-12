@@ -1,15 +1,18 @@
 # retro skill
 
-`/retro` interviews you about a deployment **while the context is still in
-your head**, writes `retros/YYYY-MM-DD-<customer>.md` from the
+`/retro` runs a **daily deployment retro** while today is still cheap to
+remember. Either interviews one engineer, or ingests a paste of meeting
+notes / a chat scroll / individual notes from multiple engineers - whatever
+your team actually does. Writes `retros/YYYY-MM-DD-<customer>.md` from the
 [RETRO.md template](../../protocols/RETRO.md), updates Debt Log verdicts in
 `DEPLOY.md`, and - if you've wired up the
 [retro-ingest workflow](../../workflows/retro-ingest) - submits the retro so
-every issue lands in Linear, deduplicated against what's already there.
+every issue lands in Linear, deduplicated against what's already there
+(including yesterday's retro from the same customer).
 
-The end-of-deployment failure mode this attacks: the retro that was going to
-be written "after the flight home" and never was. If it relies on an
-engineer's memory at the end of a 12-hour day, it will be lost.
+The failure mode this attacks: the retro that was going to be written "after
+the flight home" and never was. Daily retros survive 12-hour days; end-of
+retros do not.
 
 ## Install
 
@@ -18,8 +21,8 @@ mkdir -p .claude/skills
 cp -r path/to/deploykit/skills/retro .claude/skills/
 ```
 
-Then run `/retro` in the deployment repo at the end of a deployment (or any
-checkpoint worth learning from).
+Then run `/retro` in the deployment repo at the end of each day, at a
+milestone, or as the final wrap-up.
 
 ## Wiring it to the funnel (optional)
 

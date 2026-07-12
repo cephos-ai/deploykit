@@ -1,11 +1,12 @@
 # retro-ingest
 
-A finished [deployment retro](../../protocols/RETRO.md) goes in; every issue
-in it comes out the other side of the
+A [daily deployment retro](../../protocols/RETRO.md) goes in; every issue in
+it comes out the other side of the
 [triage core](../_shared/issue-triage) - deduplicated against Linear at the
 root-cause level, +1'd or filed. Retro learnings land in the **same
 prioritization stream** as live Slack reports, which is the whole point:
-one funnel, many inlets.
+one funnel, many inlets. Day 3's retro re-reporting Day 1's OCR bug lands as
+a second +1 on the same ticket, not a duplicate.
 
 What gets extracted:
 
@@ -17,7 +18,7 @@ What gets extracted:
 
 | Door | Effort | When to use |
 |---|---|---|
-| **Form** | zero - open the Retro Form node's URL and paste | retros written in Docs/Notion, or right after the retro meeting |
+| **Form** | zero - open the Retro Form node's URL and paste | daily retros written in Docs/Notion, or a paste right after a standup |
 | **Webhook** | zero - `POST { customer, retro_markdown }` | the [`/retro` skill](../../skills/retro) submits here automatically |
 | **GitHub push** | pick owner/repo + GitHub credential | retros committed to `retros/*.md` in your deployment repo - the artifact and the trigger become the same act |
 

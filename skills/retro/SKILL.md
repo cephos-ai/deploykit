@@ -1,55 +1,70 @@
 ---
 name: retro
-description: Run a deployment retrospective interview. Use when the user says /retro, finishes a deployment or deployment phase, or asks to write a deployment retro. Interviews the user against the RETRO.md template while context is fresh, writes the retro file, and optionally submits it to the retro-ingest workflow.
+description: Run a daily deployment retrospective. Use when the user says /retro, finishes a day of a deployment, hits a checkpoint or milestone, or asks to write a deployment retro. Accepts either an interview with one engineer or a paste of meeting notes / a chat scroll / individual notes from multiple engineers. Writes the retro file and optionally submits it to the retro-ingest workflow.
 ---
 
 # Deployment retro interviewer
 
-Your job: get the deployment out of the engineer's head **before it
-evaporates** - they may be exhausted and about to context-switch. Interview,
-don't lecture. Then write the file and offer to ship it into the feedback
-funnel.
+Your job: get **today's deployment work** out of the engineers' heads before
+tomorrow overwrites it. Retros are a daily habit here, not an end-of-flight
+ritual. Then write the file and offer to ship it into the feedback funnel.
 
 ## Step 1 - locate the template and prior retros
 
 - Use the repo's own retro template if one exists (`RETRO.md` or
   `protocols/RETRO.md`); otherwise use the deploykit template structure:
   https://github.com/cephos-ai/deploykit/blob/main/protocols/RETRO.md
-- Look in `retros/` for the most recent comparable retro - you'll need its
-  metrics for trend comparison. If found, pre-fill the "Previous" column.
-- Read `DEPLOY.md`'s Debt Log if present: every `_pending_` entry must get a
-  verdict during this interview.
+- Look in `retros/` for the most recent retro (usually yesterday's for the
+  same customer) to check continuity: which issues were open, which debt was
+  still `_pending_`, what decisions were due today.
+- Read `DEPLOY.md`'s Debt Log entries added since the last retro - each one
+  needs a verdict today.
 
-## Step 2 - interview
+## Step 2 - pick an input mode
 
-Ask in batches of 2–3 questions, not one giant form. Keep the engineer's
-answers verbatim where possible - color is data. Cover, in order:
+Ask which shape the raw input takes, and adapt:
 
-1. **The deployment**: customer, dates, team, environment. The agreed success
-   criteria and the measured number. Met or not?
-2. **Metrics**: time to production, engineering burden (engineers × days),
-   deployment bug count. Compare to the previous retro and note the trend.
-3. **What worked** - deliberately repeatable things.
-4. **Debt verdicts**: walk each `_pending_` Debt Log entry - promote / keep /
-   delete, with an owner for every promotion.
-5. **Issues**: for each distinct problem, capture: one-line summary,
-   system/component, times seen, severity (blocker/major/minor), sanitized
-   context, workaround link. Push for count estimates - "a few times" becomes
-   "~5". **Sanitize**: no customer names in context fields if the customer is
-   sensitive, no credentials, no private document contents.
-6. **Decisions**: each with an owner and a date.
+- **Interview** (one engineer, live): default. Ask in batches of 2-3
+  questions, not one giant form. Keep answers verbatim where possible.
+- **Meeting notes / chat scroll / shared doc paste**: user pastes the raw
+  text. Extract structure from it; ask short follow-ups only for missing
+  fields (severity, count, sanitization gaps).
+- **Multiple engineers, async**: collect what each contributed, then
+  synthesize into one retro file. Record every contributor by name in the
+  Contributors field.
 
-If the user is clearly drained, accept short answers and mark gaps with
-`<!-- TODO -->` rather than dragging the interview out.
+## Step 3 - cover the fields
 
-## Step 3 - write the file
+Whichever mode, walk these in order:
+
+1. **Deployment**: customer, today's date, checkpoint (day N of ~M, or
+   milestone name, or end-of-deployment), contributors, anything new about
+   the environment.
+2. **What worked today** - things worth repeating tomorrow. Small wins count.
+3. **Debt verdicts**: walk each new `_pending_` Debt Log entry - promote /
+   keep / delete, with an owner for every promotion.
+4. **Issues seen today**: for each distinct problem, capture: one-line
+   summary, system/component, times seen **today**, severity
+   (blocker/major/minor), sanitized context, workaround link. Push for count
+   estimates - "a few times" becomes "~3". **Sanitize**: no customer names in
+   context fields if the customer is sensitive, no credentials, no private
+   document contents. Don't worry about deduping against prior days - the
+   funnel handles that.
+5. **Decisions**: each with an owner and a date.
+6. **End-of-deployment retro only**: also fill Agreed success criteria + Met?
+   using the SoW verbatim.
+
+If a contributor is clearly drained, accept short answers and mark gaps with
+`<!-- TODO -->` rather than dragging the retro out.
+
+## Step 4 - write the file
 
 Write to `retros/YYYY-MM-DD-<customer>.md` (today's date, customer slug),
 following the template's structure exactly - especially the `### Issue:`
 heading format, which downstream tooling parses. Update the Debt Log verdicts
 in `DEPLOY.md` to match what was decided.
 
-## Step 4 - submit to the feedback funnel
+## Step 5 - submit to the feedback funnel
 
 If the environment variable `DEPLOYKIT_RETRO_WEBHOOK_URL` is set (or the user
 provides a webhook URL), offer to submit the retro to the retro-ingest

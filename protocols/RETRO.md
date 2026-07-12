@@ -1,47 +1,45 @@
 # RETRO.md - deployment retrospective template
 
-> Copy this template to `retros/YYYY-MM-DD-<customer>.md` in your deployment
-> repo and fill it in **within 48 hours** of finishing (or checkpointing) a
-> deployment - while context is still cheap. Both the deployment team and the
-> platform team should be in the room.
+> **Run this every day of a deployment**, not just at the end. One file per
+> day at `retros/YYYY-MM-DD-<customer>.md` in your deployment repo. The final
+> day's retro doubles as the wrap-up (fill in the success-criteria fields
+> then).
+>
+> The input can be a stand-up, a shared doc the team added to during the day,
+> a chat scroll, or one engineer's notes - whatever your team actually does.
+> Contributors go in the field below; it does not have to be a meeting.
 >
 > Two ways to skip the blank page: run the
 > [`/retro` skill](https://github.com/cephos-ai/deploykit/tree/main/skills/retro)
-> and let it interview you, and/or feed the finished file to the
+> to interview you (or ingest a paste of meeting notes), and/or feed the
+> finished file to the
 > [`retro-ingest` workflow](https://github.com/cephos-ai/deploykit/tree/main/workflows/retro-ingest)
 > so every issue below lands in your tracker automatically.
 
 ## Deployment
 
 - **Customer:** <name or codename>
-- **Dates:** <start> → <end or checkpoint>
-- **Team:** <engineers on the ground + remote support>
-- **Environment:** <cloud / on-prem / air-gapped; anything unusual>
-- **Agreed success criteria:** <the quantified outcome the customer signed off on - copy it verbatim>
-- **Met?** yes / no / partially - <the number>
+- **Date:** <today>
+- **Checkpoint:** <day N of ~M / milestone: <name> / end-of-deployment>
+- **Contributors:** <engineers who fed this retro - on-site, remote, present in the meeting, or async in the doc>
+- **Environment:** <cloud / on-prem / air-gapped; anything unusual or newly discovered today>
+- **Agreed success criteria:** <fill only on the end-of-deployment retro - copy verbatim from the SoW>
+- **Met?** <fill only on the end-of-deployment retro> yes / no / partially - <the number>
 
-## Metrics
 
-Compare against your last *comparable* deployment. If these aren't trending
-down, you're not scaling - that's the point of measuring.
+## What worked today
 
-| Metric | This deployment | Previous | Trend |
-|---|---|---|---|
-| Time to production (first access → fully working, integrated system) | | | ↓ / → / ↑ |
-| Engineering burden (engineers × days) | | | ↓ / → / ↑ |
-| Deployment bug rate (bugs/on-call requests caused by the deployment itself) | | | ↓ / → / ↑ |
-
-## What worked
-
-<!-- Things to deliberately repeat next time. Checklist items that earned their place. -->
+<!-- Things to deliberately repeat. Checklist items that earned their place. Small wins count. -->
 
 -
 
 ## Deployment debt review
 
-Walk the [DEPLOY.md](DEPLOY.md) Debt Log. Every entry gets a verdict -
-promote (platform should do this), keep (legitimately customer-specific), or
-delete (dead scaffolding). Record the promotions here; they are roadmap input.
+Walk the [DEPLOY.md](DEPLOY.md) Debt Log entries logged **since the last
+retro** (or all of them, on the end-of-deployment retro). Every entry gets a
+verdict - promote (platform should do this), keep (legitimately
+customer-specific), or delete (dead scaffolding). Record the promotions here;
+they are roadmap input.
 
 | Branch | Verdict | Owner | Notes |
 |---|---|---|---|
@@ -50,15 +48,19 @@ delete (dead scaffolding). Record the promotions here; they are roadmap input.
 ## Issues
 
 <!--
-One block per distinct problem encountered, including ones you worked around.
-Keep the structure: the retro-ingest workflow splits on "### Issue:" headings
-and reads the fields. Sanitize context - no customer-private data.
+One block per distinct problem encountered today, including ones you worked
+around. Keep the structure: the retro-ingest workflow splits on "### Issue:"
+headings and reads the fields. Sanitize context - no customer-private data.
+
+Recurrence across days is handled downstream: the same root cause on day 1
+and day 3 lands as two +1s on one ticket, not two tickets. So just report
+what you saw today.
 -->
 
 ### Issue: <one-line summary>
 
 - **System/component:** <which part of the platform or integration>
-- **Times seen this deployment:** <count or estimate>
+- **Times seen today:** <count or estimate>
 - **Severity:** blocker / major / minor
 - **Context (sanitized):** <what happened, error shapes, timing - enough for an engineer who wasn't there>
 - **Workaround:** <link to Debt Log entry if one exists, or "none">
