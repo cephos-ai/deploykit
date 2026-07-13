@@ -20,22 +20,10 @@ Search this repo and the core platform for an existing function, integration,
 or config flag that already does the job. If it exists but you couldn't find it in five minutes,
 that's a documentation bug - log it below as debt anyway.
 
-### 2. Isolate the hack
+### 2. Log the context
 
-If it doesn't exist, do not bury the workaround in the main branch or, worse,
-leave it uncommitted on a customer machine. Commit it to an explicitly labeled
-branch:
-
-```
-deploy/<customer>/<short-slug>
-```
-
-Example: `deploy/acme/rotated-scan-preprocess`. One hack per branch.
-
-### 3. Log the context
-
-Append an entry to the [Debt Log](#debt-log) below **in the same commit**.
-The code says what; only you know why. Context that survives:
+Append an entry to the [Debt Log](#debt-log) below. The code says what; only
+you know why. Context that survives:
 
 - why the workaround was necessary,
 - which customer system it touches (and that system's update cadence - ask),
@@ -48,8 +36,8 @@ Walk this log in the [deployment retro](RETRO.md). Every entry gets exactly
 one verdict:
 
 - **Promote** - the platform should do this natively; file it on the roadmap,
-- **Keep** - legitimately customer-specific; stays on its branch, documented,
-- **Delete** - dead scaffolding; remove the branch.
+- **Keep** - legitimately customer-specific; documented and left in place,
+- **Delete** - dead scaffolding; remove the workaround.
 
 If two customers promote the same entry, it's a missing platform feature.
 
@@ -57,9 +45,9 @@ If two customers promote the same entry, it's a missing platform feature.
 
 ## Debt Log
 
-<!-- Newest first. One entry per hack, appended in the same commit as the hack itself. -->
+<!-- Newest first. One entry per hack, added as soon as the workaround exists. -->
 
-### `deploy/<customer>/<short-slug>` - <one-line summary>
+### `<customer>/<short-slug>` - <one-line summary>
 
 - **Date:** YYYY-MM-DD
 - **Author:** @handle
@@ -69,7 +57,9 @@ If two customers promote the same entry, it's a missing platform feature.
 - **Sanitized context:** <error messages, data shapes, timing - scrubbed of customer-identifying data>
 - **Retro verdict:** _pending_ | promote | keep | delete
 
-<!-- Example entry:
+<!-- Example entry. This one lived on a `deploy/acme/rotated-scan-preprocess`
+     branch; in air-gapped or sealed environments, drop the `deploy/` prefix
+     and describe where the workaround actually lives in the fields below.
 
 ### `deploy/acme/rotated-scan-preprocess` - pre-rotate scans before OCR ingest
 

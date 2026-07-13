@@ -41,9 +41,9 @@ verdict - promote (platform should do this), keep (legitimately
 customer-specific), or delete (dead scaffolding). Record the promotions here;
 they are roadmap input.
 
-| Branch | Verdict | Owner | Notes |
+| Debt Log entry | Verdict | Owner | Notes |
 |---|---|---|---|
-| `deploy/<customer>/<slug>` | promote / keep / delete | @handle | |
+| `<customer>/<slug>` | promote / keep / delete | @handle | |
 
 ## Issues
 
