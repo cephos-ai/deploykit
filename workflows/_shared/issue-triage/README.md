@@ -44,8 +44,7 @@ Original report: https://…
 ```
 
 Occurrences for a ticket = count of its `[occurrence]` comments. That's what
-the [weekly digest](../../occurrence-digest) aggregates. No labels, no
-priority mutation - humans read the count and decide.
+the [weekly digest](../../occurrence-digest) aggregates.
 
 ## Setup (~10 min, do this before the inlets)
 
@@ -64,8 +63,7 @@ priority mutation - humans read the count and decide.
 ## Design decisions (change them if you disagree)
 
 - **Comment-only "+1", no priority changes.** The workflow never mutates
-  priority; auto-bumping is one IF-node away if you want it, but we default to
-  trust.
+  priority; auto-bumping is one IF-node away if you want it.
 - **Sanitize at the source.** The extraction prompt strips customer-identifying
   data before anything is written to Linear. Tighten the prompt for stricter
   regimes (it's in the `Extract & Sanitize` node).

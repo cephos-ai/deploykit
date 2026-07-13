@@ -1,8 +1,7 @@
 # Pre-deployment checklist
 
 > Fork this. Delete what doesn't apply, add what your last deployment taught
-> you. A checklist item that exists today should be a platform feature
-> tomorrow - treat this list as your automation backlog, not just a to-do.
+> you.
 >
 > Items are tagged with the risk they defend against:
 > **[process]** **[translation]** **[resilience]** **[update]** **[drift]**
@@ -38,7 +37,7 @@
 ## Day one
 
 - [ ] Clock started - note the timestamp access was granted
-- [ ] Access actually works (the gap between "confirmed" and "works" is where day one dies)
+- [ ] Access actually works
 - [ ] Smoke test: the thinnest end-to-end slice of your system runs in their environment
 - [ ] Introduce the feedback channel to the customer team: where to report, what happens when they do
 - [ ] Re-validate success criteria with the people in the room - travel has a way of changing what was agreed

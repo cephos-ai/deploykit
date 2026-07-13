@@ -5,12 +5,7 @@ description: Enforce the DEPLOY.md deployment-debt protocol when writing one-off
 
 # Deployment-debt protocol
 
-You are working in a customer deployment repo. Any one-off code written here
-is **deployment debt**: it must be captured the moment it's created, or it
-evaporates and bottlenecks the next installation. Follow this protocol
-whenever you are about to write (or have just written) a workaround, glue
-script, patch, or manual fix that exists because of this customer's
-environment.
+You are working in a customer deployment repo. Any one-off code written here is **deployment debt** and must be logged in DEPLOY.md in the same commit. Follow this protocol whenever you are about to write (or have just written) a workaround, glue script, patch, or manual fix that exists because of this customer's environment.
 
 ## Before writing the workaround
 
@@ -44,8 +39,7 @@ before proceeding.
 
 ## Rules of thumb
 
-- A five-minute fix still gets a log entry - small hacks compound into the
-  same debt as big ones.
+- A five-minute fix still gets a log entry.
 - Never write customer-private data into the log, commit messages, or branch
   names. When in doubt, describe the shape of the data, not the data.
 - If the user asks you to skip the protocol, do it, but note the unlogged

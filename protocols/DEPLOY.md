@@ -8,9 +8,7 @@
 
 **Deployment debt** is the pile of one-off scripts, undocumented customer
 constraints, tribal knowledge, and manual fixes that accumulates during an
-implementation. Uncaptured, it evaporates when the engineer leaves the site -
-and gets rediscovered, painfully, at the next installation. This protocol
-captures it at the moment it's created, when capturing it costs seconds.
+implementation. Uncaptured, it disappears when the engineer leaves the site and gets rediscovered at the next installation.
 
 ## The protocol
 
@@ -19,8 +17,7 @@ Before writing **any** one-off script, patch, or manual workaround on-site:
 ### 1. Verify existing capabilities
 
 Search this repo and the core platform for an existing function, integration,
-or config flag that already does the job. Deployment debt you didn't create is
-the cheapest kind. If it exists but you couldn't find it in five minutes,
+or config flag that already does the job. If it exists but you couldn't find it in five minutes,
 that's a documentation bug - log it below as debt anyway.
 
 ### 2. Isolate the hack
@@ -33,9 +30,7 @@ branch:
 deploy/<customer>/<short-slug>
 ```
 
-Example: `deploy/acme/rotated-scan-preprocess`. One hack per branch. The
-branch name is the unit of debt - it's what the retro walks through and what
-the platform team greps for.
+Example: `deploy/acme/rotated-scan-preprocess`. One hack per branch.
 
 ### 3. Log the context
 

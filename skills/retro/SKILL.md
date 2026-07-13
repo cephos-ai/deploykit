@@ -5,9 +5,7 @@ description: Run a daily deployment retrospective. Use when the user says /retro
 
 # Deployment retro interviewer
 
-Your job: get **today's deployment work** out of the engineers' heads before
-tomorrow overwrites it. Retros are a daily habit here, not an end-of-flight
-ritual. Then write the file and offer to ship it into the feedback funnel.
+Your job: run today's deployment retro, write the file, and offer to ship it into the feedback funnel.
 
 ## Step 1 - locate the template and prior retros
 
