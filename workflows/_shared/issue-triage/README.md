@@ -60,7 +60,7 @@ the [weekly digest](../../occurrence-digest) aggregates.
 4. **Activate** is not needed - this workflow only runs when called by an
    inlet. Import the inlets next and point their *Run Issue Triage* node here.
 
-## Design decisions (change them if you disagree)
+## Design decisions
 
 - **Comment-only "+1", no priority changes.** The workflow never mutates
   priority; auto-bumping is one IF-node away if you want it.
@@ -77,6 +77,5 @@ the [weekly digest](../../occurrence-digest) aggregates.
   *Run Issue Triage* node isn't pointed at this imported workflow.
 - **Everything creates new tickets** → check `searchIssues` returns results
   for your workspace (run this workflow alone with pinned test data); very
-  new workspaces with empty backlogs will behave this way - correctly.
-- **Duplicate-ish tickets** → the judge is conservative by design; loosen the
-  root-cause definition in the `Judge Root Cause` prompt.
+  new workspaces with empty backlogs will behave this way.
+- **Duplicate-ish tickets** → the judge favors creating tickets over matching; loosen the root-cause definition in the `Judge Root Cause` prompt.

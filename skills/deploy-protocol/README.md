@@ -2,8 +2,8 @@
 
 Makes coding agents follow the [DEPLOY.md protocol](../../protocols/DEPLOY.md)
 while you hack on-site: verify existing capabilities before writing a
-workaround, isolate hacks to `deploy/<customer>/<slug>` branches, and log the
-context in the Debt Log - in the same commit, with customer data scrubbed.
+workaround, and log the context in the Debt Log in the same commit, with
+customer data scrubbed.
 
 ## Install
 
@@ -25,9 +25,8 @@ of the same protocol for `CLAUDE.md`, `.cursor/rules/`, or `AGENTS.md`.
 With the skill, an agent asked to "fix the OCR ingest for these rotated scans":
 
 1. searches the platform for an existing preprocessing hook first,
-2. puts the script on `deploy/acme/rotated-scan-preprocess`,
-3. appends a sanitized Debt Log entry to `DEPLOY.md` in the same commit,
-4. leaves the retro verdict `_pending_` for the [retro](../../protocols/RETRO.md) to resolve.
+2. appends a sanitized Debt Log entry to `DEPLOY.md` in the same commit as the workaround,
+3. leaves the retro verdict `_pending_` for the [retro](../../protocols/RETRO.md) to resolve.
 
 The deployment repo needs a `DEPLOY.md` at its root - grab the
 [template](../../protocols/DEPLOY.md). If it's missing, the skill offers to

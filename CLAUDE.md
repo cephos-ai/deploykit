@@ -21,7 +21,9 @@ deploykit is an open-source kit for deployment engineering: protocols, workflows
 
 **Forkable over configurable.** Artifacts should be plain markdown or single-file workflow exports. Readers change the words, not the config.
 
-**Sanitize at the source.** Any workflow or skill that touches customer context must scrub identifiers before the context leaves its origin channel.
+**Sanitize at the source.** Any workflow or skill that touches customer context must scrub identifiers before the context leaves its origin channel. Canonical phrasing for prose: "describe the shape of the data, not the data."
+
+**Skills reference, don't restate.** Protocol and template content lives in `protocols/*.md` (the files users fork). `SKILL.md` files load them and add only agent-specific behavior (triggers, interview mechanics, scaffolding, submission). Never re-enumerate fields or restate rules. `skills/deploy-protocol/rules.md` is the one deliberate mirror, for non-Claude agents that can't chain file reads.
 
 ## When editing the README
 

@@ -10,14 +10,14 @@
 
 ### Success criteria
 - [ ] Success criteria for this deployment are **quantified and written down** (a specific number and threshold)
-- [ ] The customer has **agreed to that number** - in writing, before anyone travels
+- [ ] The customer has **agreed to that number**
 - [ ] You know who on the customer side declares success, and they'll be present
 
 ### Know the environment **[translation]**
-- [ ] Customer SOPs and technical specs are in the hands of the **engineers going on-site** - not summarized through a PM
+- [ ] Customer SOPs and technical specs are in the hands of the **engineers going on-site**
 - [ ] Network reality confirmed: cloud / VPN / on-prem / air-gapped, and what that means for your tooling
 - [ ] Access requested and confirmed: accounts, badges, VPN credentials, machine provisioning - with a named contact for when they don't work
-- [ ] For every internal system you'll integrate with, you've asked about its **update cadence and API half-life** **[drift]**
+- [ ] For every internal system you'll integrate with, you've asked about its **update cadence** **[drift]**
 
 ### Prepare for failure **[resilience]**
 - [ ] Contingency written for your platform's top 3 failure modes in *this* environment
@@ -45,7 +45,7 @@
 ## Before you leave
 
 - [ ] Success criteria measured and the number shared with the customer
-- [ ] Every workaround is on a `deploy/<customer>/<slug>` branch with a Debt Log entry **[process]**
+- [ ] Every workaround has a Debt Log entry in `DEPLOY.md` **[process]**
 - [ ] On-call/support handoff: the customer knows who to contact, your team knows what was deployed
 - [ ] Update path tested once end-to-end from outside the building **[update]**
 - [ ] Metrics recorded: time to production, engineering burden, deployment bug count

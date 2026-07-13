@@ -6,7 +6,7 @@ description: Enforce the DEPLOY.md deployment-debt protocol when writing one-off
 # Deployment-debt protocol
 
 You are working in a customer deployment repo. Any one-off code written here
-is **deployment debt** and must be logged as soon as the workaround exists.
+is **deployment debt** and must be logged as soon as you write it.
 
 ## What to follow
 

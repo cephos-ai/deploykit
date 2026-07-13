@@ -8,7 +8,7 @@
 <!-- TODO: replace with a real screenshot/GIF after the n8n import smoke test -->
 ![An FDE mentions the bot in Slack; the report lands as a +1 occurrence on the existing Linear ticket for the same root cause](assets/hero.svg)
 
-Reported multiple times across multiple channels, filed once. Deduplication happens at the **root-cause level** (an LLM judges "would fixing that ticket fix this report?"), not by string matching. And every Monday at 9am, the platform team's channel gets the counts:
+Deduplication happens at the **root-cause level** (an LLM judges "would fixing that ticket fix this report?"), not by string matching. And every Monday at 9am, the platform team's channel gets the counts:
 
 ```
 🔁 Top recurring deployment issues - week of 2026-07-06
@@ -52,7 +52,7 @@ A ticket appears in Linear with an `[occurrence]` comment. Run it again: the sec
 
 **Just the paper (~2 min).** Copy [`DEPLOY.md`](protocols/DEPLOY.md), [`RETRO.md`](protocols/RETRO.md), and the [checklist](checklists/pre-deployment.md) into your deployment repo. Fork mercilessly.
 
-**Agent-native FDEs.** Drop [`skills/deploy-protocol`](skills/deploy-protocol) into `.claude/skills/` so workarounds get logged automatically, and [`skills/retro`](skills/retro) so the retro happens at the end of each day (interview one engineer or paste the standup notes; it POSTs straight into [`retro-ingest`](workflows/retro-ingest)).
+**For FDEs using Claude Code / Cursor.** Drop [`skills/deploy-protocol`](skills/deploy-protocol) into `.claude/skills/` so workarounds get logged automatically, and [`skills/retro`](skills/retro) so the retro happens at the end of each day (interview one engineer or paste the standup notes; it POSTs straight into [`retro-ingest`](workflows/retro-ingest)).
 
 ## How the pieces connect
 

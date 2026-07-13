@@ -6,7 +6,7 @@
 > [`skills/deploy-protocol`](https://github.com/cephos-ai/deploykit/tree/main/skills/deploy-protocol)
 > so the rules are enforced automatically.
 
-**Deployment debt** is the pile of one-off scripts, undocumented customer constraints, tribal knowledge, and manual fixes that accumulates during an implementation and gets rediscovered at the next customer if it isn't logged.
+**Deployment debt** is the pile of one-off scripts, undocumented customer constraints, tribal knowledge, and manual fixes that accumulates during an implementation. If you don't log it, you rediscover it at the next customer.
 
 ## The protocol
 
@@ -60,11 +60,9 @@ If two customers promote the same entry, it's a missing platform feature.
 - **Sanitized context:** <error messages, data shapes, timing - scrubbed of customer-identifying data>
 - **Retro verdict:** _pending_ | promote | keep | delete
 
-<!-- Example entry. This one lived on a `deploy/acme/rotated-scan-preprocess`
-     branch; in air-gapped or sealed environments, drop the `deploy/` prefix
-     and describe where the workaround actually lives in the fields below.
+<!-- Example entry.
 
-### `deploy/acme/rotated-scan-preprocess` - pre-rotate scans before OCR ingest
+### `acme/rotated-scan-preprocess` - pre-rotate scans before OCR ingest
 
 - **Date:** 2026-07-08
 - **Author:** @ismail

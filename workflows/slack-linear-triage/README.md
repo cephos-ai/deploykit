@@ -40,8 +40,7 @@ At [api.slack.com/apps](https://api.slack.com/apps) → *Create New App* → fro
 - `/invite @yourbot` to the channel.
 - Mention the bot on the message (or anywhere in the thread) you want
   tracked: `@deploybot this is the third time ingest silently skipped a batch`.
-  The **entire thread** is used as context, so mentioning after discussion
-  captures more.
+  The **entire thread** is used as context, so mentioning after discussion helps.
 
 ## Customization
 
