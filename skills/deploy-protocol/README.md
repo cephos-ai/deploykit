@@ -22,8 +22,7 @@ of the same protocol for `CLAUDE.md`, `.cursor/rules/`, or `AGENTS.md`.
 
 ## What it changes in practice
 
-Without the skill, an agent asked to "fix the OCR ingest for these rotated
-scans" writes a script and moves on. With it, the agent:
+With the skill, an agent asked to "fix the OCR ingest for these rotated scans":
 
 1. searches the platform for an existing preprocessing hook first,
 2. puts the script on `deploy/acme/rotated-scan-preprocess`,

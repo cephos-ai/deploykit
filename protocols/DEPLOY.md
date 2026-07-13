@@ -22,8 +22,7 @@ that's a documentation bug - log it below as debt anyway.
 
 ### 2. Log the context
 
-Append an entry to the [Debt Log](#debt-log) below. The code says what; only
-you know why. Context that survives:
+Append an entry to the [Debt Log](#debt-log) below. Include:
 
 - why the workaround was necessary,
 - which customer system it touches (and that system's update cadence - ask),

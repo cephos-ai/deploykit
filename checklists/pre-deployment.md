@@ -9,7 +9,7 @@
 ## Before you arrive
 
 ### Success criteria
-- [ ] Success criteria for this deployment are **quantified and written down** (a number, not a vibe)
+- [ ] Success criteria for this deployment are **quantified and written down** (a specific number and threshold)
 - [ ] The customer has **agreed to that number** - in writing, before anyone travels
 - [ ] You know who on the customer side declares success, and they'll be present
 
@@ -40,7 +40,7 @@
 - [ ] Access actually works
 - [ ] Smoke test: the thinnest end-to-end slice of your system runs in their environment
 - [ ] Introduce the feedback channel to the customer team: where to report, what happens when they do
-- [ ] Re-validate success criteria with the people in the room - travel has a way of changing what was agreed
+- [ ] Re-validate success criteria with the people in the room (what was agreed may have shifted)
 
 ## Before you leave
 

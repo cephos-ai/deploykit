@@ -1,7 +1,6 @@
 # retro skill
 
-`/retro` runs a **daily deployment retro** while today is still cheap to
-remember. Either interviews one engineer, or ingests a paste of meeting
+`/retro` runs a **daily deployment retro**. Either interviews one engineer, or ingests a paste of meeting
 notes / a chat scroll / individual notes from multiple engineers - whatever
 your team actually does. Writes `retros/YYYY-MM-DD-<customer>.md` from the
 [RETRO.md template](../../protocols/RETRO.md), updates Debt Log verdicts in

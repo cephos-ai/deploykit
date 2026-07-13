@@ -9,8 +9,7 @@ a second +1 on the same ticket, not a duplicate.
 What gets extracted:
 
 - every `### Issue:` block (the template's structured format), and
-- every Debt Log entry the retro **promoted** - a promotion is a platform
-  gap, and platform gaps are roadmap items.
+- every Debt Log entry the retro **promoted**.
 
 ## Three ways in
 

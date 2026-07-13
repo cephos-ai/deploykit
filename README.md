@@ -75,7 +75,7 @@ Deployment war stories welcome. If you built a workaround twice, someone else ne
 
 ## Why this exists
 
-The thinking behind the kit (deployment debt, the deployment-product funnel, the metrics that prove you're scaling) is in [Deployment Is All You Need](https://cephos.substack.com/p/deployment-is-all-you-need). Maintained by [Cephos](https://cephos.ai). MIT licensed, take what's useful.
+The thinking behind the kit is in [Deployment Is All You Need](https://cephos.substack.com/p/deployment-is-all-you-need). Maintained by [Cephos](https://cephos.ai). MIT licensed, take what's useful.
 
 <a href="https://www.star-history.com/#cephos-ai/deploykit&Date">
   <img src="https://api.star-history.com/svg?repos=cephos-ai/deploykit&type=Date" alt="Star history chart" width="480">

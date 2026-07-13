@@ -9,7 +9,7 @@
 > a chat scroll, or one engineer's notes - whatever your team actually does.
 > Contributors go in the field below; it does not have to be a meeting.
 >
-> Two ways to skip the blank page: run the
+> Two shortcuts: run the
 > [`/retro` skill](https://github.com/cephos-ai/deploykit/tree/main/skills/retro)
 > to interview you (or ingest a paste of meeting notes), and/or feed the
 > finished file to the
@@ -28,8 +28,6 @@
 
 
 ## What worked today
-
-<!-- Things to deliberately repeat. Checklist items that earned their place. Small wins count. -->
 
 -
 
@@ -67,7 +65,7 @@ what you saw today.
 
 ## Decisions
 
-<!-- Every decision needs an owner and a date, or it's a wish. -->
+<!-- Every decision needs an owner and a date. -->
 
 | Decision | Owner | By when |
 |---|---|---|
