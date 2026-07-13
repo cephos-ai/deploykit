@@ -1,0 +1,206 @@
+{
+  "id": "0b0be2ac9a4ad24e",
+  "name": "deploykit - slack → linear triage",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## deploykit - Slack inlet\n\n@mention your bot on any message worth tracking; the thread gets sanitized and triaged into Linear (+1 on an existing root cause, or a new ticket), and the bot replies with the result.\n\n**Setup:**\n1. Import the issue-triage core first, then point *Run Issue Triage* at it.\n2. Attach your **Slack** credential to the trigger and the three Slack-touching nodes.\n3. In your Slack app: subscribe to the `app_mention` event with the trigger's webhook URL; scopes `app_mentions:read`, `channels:history`, `channels:read`, `chat:write`.\n4. Convention: name deployment channels `deploy-<customer>` - the customer slug is derived from the channel name.\n5. Activate.",
+        "height": 380,
+        "width": 400
+      },
+      "id": "22222222-2222-4222-8222-222222222200",
+      "name": "Setup Notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-60, -440]
+    },
+    {
+      "parameters": {
+        "trigger": ["app_mention"],
+        "options": {}
+      },
+      "id": "22222222-2222-4222-8222-222222222201",
+      "name": "Slack Trigger",
+      "type": "n8n-nodes-base.slackTrigger",
+      "typeVersion": 1,
+      "position": [0, 0],
+      "credentials": {
+        "slackApi": {
+          "id": "CONFIGURE_ME",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "channel",
+        "operation": "get",
+        "channelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.channel }}"
+        }
+      },
+      "id": "22222222-2222-4222-8222-222222222202",
+      "name": "Get Channel Info",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [220, 0],
+      "credentials": {
+        "slackApi": {
+          "id": "CONFIGURE_ME",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "channel",
+        "operation": "replies",
+        "channelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Slack Trigger').item.json.channel }}"
+        },
+        "ts": "={{ $('Slack Trigger').item.json.thread_ts || $('Slack Trigger').item.json.ts }}",
+        "returnAll": true,
+        "filters": {}
+      },
+      "id": "22222222-2222-4222-8222-222222222203",
+      "name": "Get Thread",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [440, 0],
+      "credentials": {
+        "slackApi": {
+          "id": "CONFIGURE_ME",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const trigger = $('Slack Trigger').first().json;\nconst channel = $('Get Channel Info').first().json;\nconst messages = $input.all().map(i => i.json);\n\nconst text = messages\n  .map(m => (m.text || '').replace(/<@[^>]+>/g, '').trim())\n  .filter(t => t.length > 0)\n  .join('\\n');\n\nconst channelName = channel.name || 'unknown';\n\nreturn [{\n  json: {\n    source: 'slack',\n    customer: channelName.replace(/^deploy-/, ''),\n    raw_text: text || (trigger.text || '').replace(/<@[^>]+>/g, '').trim(),\n    reported_at: new Date(parseFloat(trigger.ts) * 1000).toISOString(),\n  },\n}];"
+      },
+      "id": "22222222-2222-4222-8222-222222222204",
+      "name": "Build Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [660, 0]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "",
+          "cachedResultName": "deploykit - issue triage (core)"
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "22222222-2222-4222-8222-222222222205",
+      "name": "Run Issue Triage",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [880, 0]
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $('Slack Trigger').first().json.channel }}"
+        },
+        "text": "={{ $json.action === 'created' ? ':new: Filed *' + $json.identifier + '* - ' + $json.title + '\\n' + $json.issue_url : ':heavy_plus_sign: +1 on *' + $json.identifier + '* (same root cause) - ' + $json.title + '\\n' + $json.issue_url }}",
+        "otherOptions": {
+          "thread_ts": {
+            "replyValues": {
+              "thread_ts": "={{ $('Slack Trigger').first().json.thread_ts || $('Slack Trigger').first().json.ts }}"
+            }
+          }
+        }
+      },
+      "id": "22222222-2222-4222-8222-222222222206",
+      "name": "Reply in Thread",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.3,
+      "position": [1100, 0],
+      "credentials": {
+        "slackApi": {
+          "id": "CONFIGURE_ME",
+          "name": "Slack account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Slack Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Channel Info",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Channel Info": {
+      "main": [
+        [
+          {
+            "node": "Get Thread",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Thread": {
+      "main": [
+        [
+          {
+            "node": "Build Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Report": {
+      "main": [
+        [
+          {
+            "node": "Run Issue Triage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Issue Triage": {
+      "main": [
+        [
+          {
+            "node": "Reply in Thread",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}
