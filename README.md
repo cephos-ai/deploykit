@@ -1,6 +1,6 @@
 # deploykit
 
-An open-source kit for agent-native **deployment engineering**. Designed to be forked and adapted to deployment workflows in your organization. 
+**Agent-native, open-source deployment tooling.** The opinionated kit for forward-deployed engineers shipping AI into customer environments: protocols you fork, checklists you steal, n8n workflows for Slack + Linear + retros, and Claude Code / Cursor skills that run the on-site work with you.
 
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
