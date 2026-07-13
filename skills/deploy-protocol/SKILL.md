@@ -15,10 +15,6 @@ Read `DEPLOY.md` at the root of this repo and follow "The protocol" and
 sanitization, small-hack rule, unlogged-debt rule. That file is the source of
 truth for the workflow; this skill is just the trigger.
 
-If the repo has no `DEPLOY.md`, offer to create one from the deploykit
-template (https://github.com/cephos-ai/deploykit/blob/main/protocols/DEPLOY.md)
-before proceeding.
-
 ## Agent-specific behavior
 
 - When you search for existing capabilities (step 1 of the protocol), tell

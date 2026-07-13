@@ -39,9 +39,13 @@ verdict - promote (platform should do this), keep (legitimately
 customer-specific), or delete (dead scaffolding). Record the promotions here;
 they are roadmap input.
 
-| Debt Log entry | Verdict | Owner | Notes |
-|---|---|---|---|
-| `<customer>/<slug>` | promote / keep / delete | @handle | |
+Before recording a verdict, re-read each entry's `Sanitized context` field.
+If a customer name, host, ID, or literal record slipped through, scrub the
+entry in `DEPLOY.md` first and tick `Sanitized?` = yes.
+
+| Debt Log entry | Verdict | Owner | Sanitized? | Notes |
+|---|---|---|---|---|
+| `<customer>/<slug>` | promote / keep / delete | @handle | yes | |
 
 ## Issues
 

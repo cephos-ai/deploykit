@@ -9,9 +9,8 @@ Your job: run today's deployment retro, write the file, and offer to ship it int
 
 ## Step 1 - locate the template and prior retros
 
-- Use the repo's own retro template if one exists (`RETRO.md` or
-  `protocols/RETRO.md`); otherwise use the deploykit template structure:
-  https://github.com/cephos-ai/deploykit/blob/main/protocols/RETRO.md
+- Use the repo's own retro template (`RETRO.md` or `protocols/RETRO.md`). If
+  neither exists, tell the user to add one and stop.
 - Look in `retros/` for the most recent retro (usually yesterday's for the
   same customer) to check continuity: which issues were open, which debt was
   still `_pending_`, what decisions were due today.
@@ -41,6 +40,10 @@ and how to sanitize.
 Interview mechanics on top of the template:
 
 - Push for count estimates on issues - "a few times" becomes "~3".
+- When walking the Debt Log review, re-check the `Sanitized context` field
+  of every entry before recording its verdict. If a customer name, host, ID,
+  or literal record slipped in, ask the engineer to rephrase - describe the
+  shape of the data, not the data - and update the entry before continuing.
 - If a contributor is clearly drained, accept short answers and mark gaps
   with `<!-- TODO -->` rather than dragging the retro out.
 
@@ -66,6 +69,4 @@ EOF
 ```
 
 Confirm with the user before sending - the retro leaves the repo at this
-point. If no webhook is configured, mention that the retro-ingest workflow
-(https://github.com/cephos-ai/deploykit/tree/main/workflows/retro-ingest) can
-turn this file into tracked, deduplicated tickets, and move on.
+point. If no webhook is configured, move on; the file itself is the artifact.
