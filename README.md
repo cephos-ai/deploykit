@@ -10,7 +10,7 @@
 
 Deduplication happens at the **root-cause level** (an LLM judges "would fixing that ticket fix this report?"), not by string matching. And every Monday at 9am, the platform team's channel gets the counts:
 
-```
+```text
 🔁 Top recurring deployment issues - week of 2026-07-06
 
 1. PLT-142 OCR fails on rotated scans - 3× this week (acme, globex)

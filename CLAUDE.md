@@ -17,6 +17,10 @@ deploykit is an open-source kit for deployment engineering: protocols, workflows
 
 **Terse and direct.** No corporate voice. No "we're excited to." Short paragraphs. If a line does not earn its place, delete it.
 
+**No aphorisms, slogans, or X-not-Y tails.** Cut phrases like "that's the point," "humans read it and decide," "not just X, Y," "or it's a wish," "small wins count" the moment they appear. Definitions, instructions, and checklists don't need editorial closers.
+
+**No metaphor vignettes or buzzword adjectives.** Debt doesn't "evaporate," workflows don't "come out the other side," day one doesn't "die," code isn't "agent-native," APIs don't have "half-lives." State the fact or consequence plainly.
+
 **Never use em dashes.** Use hyphens, commas, colons, or parentheses instead. Applies to every file in the repo, including this one.
 
 **Forkable over configurable.** Artifacts should be plain markdown or single-file workflow exports. Readers change the words, not the config.

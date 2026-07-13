@@ -4,7 +4,7 @@ The shared funnel every inlet calls. Give it a raw field report; it returns a
 Linear ticket that represents the **root cause** - either an existing one that
 just got a +1, or a new one.
 
-```
+```text
 input → extract & sanitize (LLM) → search Linear → same root cause? (LLM)
       → yes: +1 occurrence comment          → no: create ticket, then +1 comment
 ```
@@ -25,7 +25,6 @@ Callers (the [Slack inlet](../../slack-linear-triage), the
 | `source` | yes | `slack`, `retro`, or your own |
 | `customer` | yes | deployment/customer slug |
 | `raw_text` | yes | the report, verbatim - sanitization happens here, not in the caller |
-| `link` | no | URL back to the original report |
 | `reported_at` | no | ISO timestamp |
 
 It returns `{ action: "occurrence_added" | "created", identifier, issue_url, title }`.
@@ -35,12 +34,10 @@ It returns `{ action: "occurrence_added" | "created", identifier, issue_url, tit
 Every occurrence - including the first, on a freshly created ticket - is a
 Linear comment that starts with the literal marker `[occurrence]`:
 
-```
+```text
 [occurrence] deployment: acme · source: slack · 2026-07-08
 
 > sanitized context of what happened
-
-Original report: https://…
 ```
 
 Occurrences for a ticket = count of its `[occurrence]` comments. That's what

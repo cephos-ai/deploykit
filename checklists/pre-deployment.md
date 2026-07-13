@@ -27,7 +27,7 @@
 ### Update mechanics **[update]**
 - [ ] You know how you'll ship changes *during* the deployment (pipeline, cadence, who approves)
 - [ ] You know how you'll ship changes *after* you leave
-- [ ] Requirements will shift on-site
+- [ ] Scope-change process is agreed with the customer: who approves in-flight requirement changes, and where they get written down
 
 ### Instrumentation **[process]**
 - [ ] `DEPLOY.md` protocol file is in the deployment repo ([template](../protocols/DEPLOY.md))

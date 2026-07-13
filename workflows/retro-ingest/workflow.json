@@ -123,7 +123,7 @@
     },
     {
       "parameters": {
-        "jsCode": "return $input.all().map((item) => {\n  const j = item.json;\n  let customer;\n  let retro;\n\n  if (j.body && (j.body.retro_markdown || j.body.customer)) {\n    // webhook: POST { customer, retro_markdown } - e.g. from the /retro skill\n    customer = j.body.customer;\n    retro = j.body.retro_markdown;\n  } else if (j['Retro markdown'] || j.Customer) {\n    // form submission\n    customer = j.Customer;\n    retro = j['Retro markdown'];\n  } else if (j.content && j.encoding === 'base64') {\n    // github file fetch (retros/YYYY-MM-DD-<customer>.md)\n    retro = Buffer.from(j.content, 'base64').toString('utf8');\n    const m = (j.path || j.name || '').match(/\\d{4}-\\d{2}-\\d{2}-(.+)\\.md$/);\n    customer = m ? m[1] : 'unknown';\n  }\n\n  return { json: { customer: customer || 'unknown', retro_markdown: retro || '' } };\n}).filter((i) => i.json.retro_markdown.length > 0);"
+        "jsCode": "return $input.all().map((item, i) => {\n  const j = item.json;\n  let customer;\n  let retro;\n\n  if (j.body && (j.body.retro_markdown || j.body.customer)) {\n    // webhook: POST { customer, retro_markdown } - e.g. from the /retro skill\n    customer = j.body.customer;\n    retro = j.body.retro_markdown;\n  } else if (j['Retro markdown'] || j.Customer) {\n    // form submission\n    customer = j.Customer;\n    retro = j['Retro markdown'];\n  } else if (j.content && j.encoding === 'base64') {\n    // github file fetch (retros/YYYY-MM-DD-<customer>.md)\n    retro = Buffer.from(j.content, 'base64').toString('utf8');\n    const m = (j.path || j.name || '').match(/\\d{4}-\\d{2}-\\d{2}-(.+)\\.md$/);\n    customer = m ? m[1] : 'unknown';\n  }\n\n  return { json: { customer: customer || 'unknown', retro_markdown: retro || '' }, pairedItem: i };\n}).filter((i) => i.json.retro_markdown.length > 0);"
       },
       "id": "33333333-3333-4333-8333-333333333306",
       "name": "Normalize Retro",
@@ -134,7 +134,7 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=You are processing a deployment retrospective into discrete, trackable issues.\n\nCustomer/deployment: {{ $json.customer }}\nRetro document:\n<<<\n{{ $json.retro_markdown }}\n>>>\n\nExtract every distinct issue:\n- Each \"### Issue:\" block is one issue - read its fields.\n- Each Debt Log entry with verdict \"promote\" in the debt review is ALSO one issue (these are platform gaps that should become roadmap items).\n- Ignore \"what worked\" items, metrics, and decisions.\n\nFor each issue produce:\n- summary: one line, root-cause oriented.\n- system: component/integration involved, or \"unknown\".\n- times_seen: integer count from the retro (default 1).\n- severity: blocker | major | minor.\n- context: self-contained sanitized context an engineer can act on - no customer-identifying data.",
+        "text": "=You are processing a deployment retrospective into discrete, trackable issues.\n\nCustomer/deployment: {{ $json.customer }}\nRetro document:\n<<<\n{{ $json.retro_markdown }}\n>>>\n\nExtract every distinct issue:\n- Each \"### Issue:\" block is one issue - read its fields.\n- Each Debt Log entry with verdict \"promote\" in the debt review is ALSO one issue (these are platform gaps that should become roadmap items).\n- Ignore \"what worked\" items, metrics, and decisions.\n\nFor each issue produce:\n- summary: one line, root-cause oriented.\n- system: component/integration involved, or \"unknown\".\n- times_seen: integer count from the retro (default 1).\n- severity: blocker | major | minor.\n- context: self-contained sanitized context an engineer can act on - no customer-identifying data.\n- workaround: the Workaround field verbatim (typically a Debt Log link), or \"none\".",
         "hasOutputParser": true
       },
       "id": "33333333-3333-4333-8333-333333333307",
@@ -167,7 +167,7 @@
     {
       "parameters": {
         "schemaType": "manual",
-        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"issues\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"summary\": { \"type\": \"string\" },\n          \"system\": { \"type\": \"string\" },\n          \"times_seen\": { \"type\": \"integer\" },\n          \"severity\": { \"type\": \"string\", \"enum\": [\"blocker\", \"major\", \"minor\"] },\n          \"context\": { \"type\": \"string\" }\n        },\n        \"required\": [\"summary\", \"context\"]\n      }\n    }\n  },\n  \"required\": [\"issues\"]\n}"
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"issues\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"summary\": { \"type\": \"string\" },\n          \"system\": { \"type\": \"string\" },\n          \"times_seen\": { \"type\": \"integer\" },\n          \"severity\": { \"type\": \"string\", \"enum\": [\"blocker\", \"major\", \"minor\"] },\n          \"context\": { \"type\": \"string\" },\n          \"workaround\": { \"type\": \"string\" }\n        },\n        \"required\": [\"summary\", \"context\"]\n      }\n    }\n  },\n  \"required\": [\"issues\"]\n}"
       },
       "id": "33333333-3333-4333-8333-333333333309",
       "name": "Issues Schema",
@@ -205,7 +205,7 @@
             {
               "id": "d0000000-0000-4000-8000-000000000003",
               "name": "raw_text",
-              "value": "={{ 'Issue: ' + $json.summary + '\\nSystem: ' + ($json.system || 'unknown') + '\\nTimes seen this deployment: ' + ($json.times_seen || 1) + '\\nSeverity: ' + ($json.severity || 'minor') + '\\nContext: ' + ($json.context || '') }}",
+              "value": "={{ 'Issue: ' + $json.summary + '\\nSystem: ' + ($json.system || 'unknown') + '\\nTimes seen this deployment: ' + ($json.times_seen || 1) + '\\nSeverity: ' + ($json.severity || 'minor') + '\\nContext: ' + ($json.context || '') + '\\nWorkaround: ' + ($json.workaround || 'none') }}",
               "type": "string"
             },
             {
@@ -241,7 +241,8 @@
       "name": "Run Issue Triage",
       "type": "n8n-nodes-base.executeWorkflow",
       "typeVersion": 1.2,
-      "position": [1620, 40]
+      "position": [1620, 40],
+      "onError": "continueRegularOutput"
     }
   ],
   "connections": {
