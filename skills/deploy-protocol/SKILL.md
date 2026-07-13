@@ -5,34 +5,24 @@ description: Enforce the DEPLOY.md deployment-debt protocol when writing one-off
 
 # Deployment-debt protocol
 
-You are working in a customer deployment repo. Any one-off code written here is **deployment debt** and must be logged in DEPLOY.md as soon as it exists. Follow this protocol whenever you are about to write (or have just written) a workaround, glue script, patch, or manual fix that exists because of this customer's environment.
+You are working in a customer deployment repo. Any one-off code written here
+is **deployment debt** and must be logged as soon as the workaround exists.
 
-## The protocol
+## What to follow
 
-1. **Verify existing capabilities first.** Search this repo and the core
-   platform for an existing function, integration, or config flag that already
-   does the job. Tell the user what you searched and what you found. If a
-   capability exists but was hard to find, that's a documentation gap - log it
-   as debt anyway.
-
-2. **Log it in DEPLOY.md.** Append an entry to the Debt Log in the repo's
-   `DEPLOY.md` following the entry template there. The entry must answer:
-   - why the workaround was necessary,
-   - which customer system it touches (ask the user for its update cadence if unknown),
-   - why the core platform couldn't handle it natively,
-   - sanitized context - **scrub all customer-identifying data** (names, IDs,
-     document contents, credentials) before it goes in the log.
-
-   Set the retro verdict to `_pending_`.
+Read `DEPLOY.md` at the root of this repo and follow "The protocol" and
+"Rules of thumb" sections verbatim - required log fields, verdicts,
+sanitization, small-hack rule, unlogged-debt rule. That file is the source of
+truth for the workflow; this skill is just the trigger.
 
 If the repo has no `DEPLOY.md`, offer to create one from the deploykit
 template (https://github.com/cephos-ai/deploykit/blob/main/protocols/DEPLOY.md)
 before proceeding.
 
-## Rules of thumb
+## Agent-specific behavior
 
-- A five-minute fix still gets a log entry.
-- Never write customer-private data into the log or any commit messages.
-  When in doubt, describe the shape of the data, not the data.
-- If the user asks you to skip the protocol, do it, but note the unlogged
+- When you search for existing capabilities (step 1 of the protocol), tell
+  the user what you searched and what you found. The human has no other way
+  to verify.
+- If the user asks you to skip the protocol, comply, but list the unlogged
   debt at the end of your response so it isn't silently lost.

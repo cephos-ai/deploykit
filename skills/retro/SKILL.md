@@ -31,29 +31,18 @@ Ask which shape the raw input takes, and adapt:
   synthesize into one retro file. Record every contributor by name in the
   Contributors field.
 
-## Step 3 - cover the fields
+## Step 3 - walk the template
 
-Whichever mode, walk these in order:
+Walk the fields of `RETRO.md` (or `protocols/RETRO.md`) in the order they
+appear. The template is the source of truth for what to capture, when each
+field applies (e.g. success criteria only on the end-of-deployment retro),
+and how to sanitize.
 
-1. **Deployment**: customer, today's date, checkpoint (day N of ~M, or
-   milestone name, or end-of-deployment), contributors, anything new about
-   the environment.
-2. **What worked today**.
-3. **Debt verdicts**: walk each new `_pending_` Debt Log entry - promote /
-   keep / delete, with an owner for every promotion.
-4. **Issues seen today**: for each distinct problem, capture: one-line
-   summary, system/component, times seen **today**, severity
-   (blocker/major/minor), sanitized context, workaround link. Push for count
-   estimates - "a few times" becomes "~3". **Sanitize**: no customer names in
-   context fields if the customer is sensitive, no credentials, no private
-   document contents. Don't worry about deduping against prior days - the
-   funnel handles that.
-5. **Decisions**: each with an owner and a date.
-6. **End-of-deployment retro only**: also fill Agreed success criteria + Met?
-   using the SoW verbatim.
+Interview mechanics on top of the template:
 
-If a contributor is clearly drained, accept short answers and mark gaps with
-`<!-- TODO -->` rather than dragging the retro out.
+- Push for count estimates on issues - "a few times" becomes "~3".
+- If a contributor is clearly drained, accept short answers and mark gaps
+  with `<!-- TODO -->` rather than dragging the retro out.
 
 ## Step 4 - write the file
 

@@ -25,7 +25,13 @@ Append an entry to the [Debt Log](#debt-log) below. Include:
 - why the workaround was necessary,
 - which customer system it touches (and that system's update cadence - ask),
 - why the core platform couldn't handle it natively,
-- what data it saw, sanitized of anything customer-private.
+- what data it saw, sanitized. Describe the shape of the data, not the data - no names, IDs, document contents, credentials.
+
+## Rules of thumb
+
+- A five-minute fix still gets a log entry. Small hacks compound.
+- If asked to skip the protocol, comply but state what debt went unlogged at
+  the end of the response. Unlogged debt should be loud, not silent.
 
 ## At the end of the deployment
 

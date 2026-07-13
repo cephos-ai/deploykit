@@ -48,7 +48,9 @@ they are roadmap input.
 <!--
 One block per distinct problem encountered today, including ones you worked
 around. Keep the structure: the retro-ingest workflow splits on "### Issue:"
-headings and reads the fields. Sanitize context - no customer-private data.
+headings and reads the fields. Sanitize context: describe the shape of the
+data, not the data - no customer names, IDs, private document contents,
+credentials.
 
 Recurrence across days is handled downstream: the same root cause on day 1
 and day 3 lands as two +1s on one ticket, not two tickets. So just report

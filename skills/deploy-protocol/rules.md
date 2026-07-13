@@ -4,6 +4,11 @@ Not using Claude Code skills? Paste the block below into whatever your agent
 reads: `CLAUDE.md`, `.cursor/rules/deploy-protocol.mdc`, `AGENTS.md`, or a
 system prompt. Same protocol, no skill machinery.
 
+> Mirror of `protocols/DEPLOY.md`'s "The protocol" and "Rules of thumb"
+> sections. Non-Claude agents can't reliably chain "go read that file" from a
+> rule, so the content is duplicated here on purpose. If you edit one, edit
+> the other.
+
 ---
 
 ```markdown
