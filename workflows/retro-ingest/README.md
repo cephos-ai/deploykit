@@ -3,9 +3,7 @@
 A [daily deployment retro](../../protocols/RETRO.md) goes in; every issue in
 it comes out the other side of the
 [triage core](../_shared/issue-triage) - deduplicated against Linear at the
-root-cause level, +1'd or filed. Retro learnings land in the **same
-prioritization stream** as live Slack reports, which is the whole point:
-one funnel, many inlets. Day 3's retro re-reporting Day 1's OCR bug lands as
+root-cause level, +1'd or filed. Retros feed the same triage core as Slack reports; matches land on the same ticket. Day 3's retro re-reporting Day 1's OCR bug lands as
 a second +1 on the same ticket, not a duplicate.
 
 What gets extracted:
@@ -20,7 +18,7 @@ What gets extracted:
 |---|---|---|
 | **Form** | zero - open the Retro Form node's URL and paste | daily retros written in Docs/Notion, or a paste right after a standup |
 | **Webhook** | zero - `POST { customer, retro_markdown }` | the [`/retro` skill](../../skills/retro) submits here automatically |
-| **GitHub push** | pick owner/repo + GitHub credential | retros committed to `retros/*.md` in your deployment repo - the artifact and the trigger become the same act |
+| **GitHub push** | pick owner/repo + GitHub credential | retros committed to `retros/*.md` in your deployment repo trigger the workflow on push |
 
 All three converge on the same normalization step; use whichever fits how
 your retros actually happen, or all of them at once.

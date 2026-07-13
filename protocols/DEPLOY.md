@@ -47,8 +47,6 @@ The code says what; only you know why. Context that survives:
 - why the core platform couldn't handle it natively,
 - what data it saw, sanitized of anything customer-private.
 
-If it relies on your memory at the end of a 12-hour day, it will be lost.
-
 ## At the end of the deployment
 
 Walk this log in the [deployment retro](RETRO.md). Every entry gets exactly
@@ -58,8 +56,7 @@ one verdict:
 - **Keep** - legitimately customer-specific; stays on its branch, documented,
 - **Delete** - dead scaffolding; remove the branch.
 
-An entry that gets promoted at two different customers is not a workaround,
-it's a missing feature.
+If two customers promote the same entry, it's a missing platform feature.
 
 ---
 

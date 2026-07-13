@@ -10,11 +10,6 @@ by recurrence, and posts the top 10 to a Slack channel:
 > 2. [PLT-158] Ingest silently skips oversized batches - **3×** this week (acme)
 > …
 
-This closes the loop the kit exists for: a bug seen once is an anomaly; the
-same root cause +1'd across deployments is a roadmap priority. The digest
-makes the counts impossible to ignore without mutating anyone's priorities or
-labels - humans read it and decide.
-
 Quiet week, no `[occurrence]` comments → no post.
 
 ## Setup (~3 min)
@@ -29,10 +24,8 @@ Quiet week, no `[occurrence]` comments → no post.
 
 - **Cadence:** edit the `Every Monday` schedule node. Bi-weekly matches
   bi-weekly platform planning.
-- **Window & depth:** the GraphQL query fetches up to 250 occurrence comments
-  from the last week (`-P1W`). Widen to `-P2W`/`-P1M` for slower deployment
-  rhythms. If you exceed 250 occurrences a week, add pagination - and also,
-  congratulations on the deployment volume.
+- **Window & depth:** the query caps at 250 occurrences/week (`-P1W`). Widen
+  the range or add pagination if you exceed either.
 - **Per-deployment breakdown:** the deployment slugs are already parsed from
   the comments; extend `Format Digest` to group by deployment instead of
   ranking globally.

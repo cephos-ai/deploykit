@@ -10,10 +10,6 @@ your team actually does. Writes `retros/YYYY-MM-DD-<customer>.md` from the
 every issue lands in Linear, deduplicated against what's already there
 (including yesterday's retro from the same customer).
 
-The failure mode this attacks: the retro that was going to be written "after
-the flight home" and never was. Daily retros survive 12-hour days; end-of
-retros do not.
-
 ## Install
 
 ```bash

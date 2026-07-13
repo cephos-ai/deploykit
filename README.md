@@ -1,6 +1,7 @@
 # deploykit
 
-An open-source kit for **deployment engineering**. n8n workflows that turn Slack threads and retro docs into root-cause-deduplicated Linear tickets that count their own occurrences, plus the protocols, checklists, and agent skills FDEs use to capture what they learn on-site before it evaporates.
+An open-source kit for agent-native **deployment engineering**. Designed to be forked and adapted to deployment workflows in your organization. 
+
 
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -16,7 +17,7 @@ Reported multiple times across multiple channels, filed once. Deduplication happ
 2. PLT-158 Ingest skips oversized batches - 2× this week (acme)
 ```
 
-That `3× (acme, globex)` is three separate reports about the same root cause, from two customers, rolled onto one ticket. No duplicate tickets, no "pretty sure we hit this at the last customer too," no priority mutation: just counts your platform team can't ignore.
+That `3× (acme, globex)` is three separate reports about the same root cause, from two customers, rolled onto one ticket.
 
 ## What's in the kit
 
@@ -47,9 +48,9 @@ curl -X POST https://your-n8n/webhook/deploykit-retro \
   }'
 ```
 
-A ticket appears in Linear with an `[occurrence]` comment. Run it again: the second run is a +1 on that ticket, not a duplicate. That's the whole point.
+A ticket appears in Linear with an `[occurrence]` comment. Run it again: the second run is a +1 on that ticket, not a duplicate.
 
-**Just the paper (~2 min).** Copy [`DEPLOY.md`](protocols/DEPLOY.md), [`RETRO.md`](protocols/RETRO.md), and the [checklist](checklists/pre-deployment.md) into your deployment repo. Fork mercilessly, that's the point too.
+**Just the paper (~2 min).** Copy [`DEPLOY.md`](protocols/DEPLOY.md), [`RETRO.md`](protocols/RETRO.md), and the [checklist](checklists/pre-deployment.md) into your deployment repo. Fork mercilessly.
 
 **Agent-native FDEs.** Drop [`skills/deploy-protocol`](skills/deploy-protocol) into `.claude/skills/` so workarounds get isolated and logged automatically, and [`skills/retro`](skills/retro) so the retro happens at the end of each day (interview one engineer or paste the standup notes; it POSTs straight into [`retro-ingest`](workflows/retro-ingest)).
 
@@ -66,7 +67,7 @@ flowchart LR
     occ & new --> digest["weekly digest → Slack"]
 ```
 
-One funnel, many inlets: everything converges on the same triage core, so a retro finding and a live Slack report about the same root cause land on the same ticket.
+A retro finding and a live Slack report about the same root cause land on the same ticket.
 
 ## Contributing
 

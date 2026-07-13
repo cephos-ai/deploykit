@@ -9,9 +9,7 @@ with what it did:
 > :heavy_plus_sign: +1 on **PLT-142** (same root cause) - OCR fails on rotated scans
 > https://linear.app/…
 
-This is the "capture at the moment of pain" inlet: an FDE (or the customer)
-hits something at 4pm on-site, mentions the bot, and the report is in the
-prioritization stream before anyone's memory gets involved.
+Use it when someone hits a bug on-site: mention the bot, keep working, the report is in Linear.
 
 ## Setup (~10 min, after the [triage core](../_shared/issue-triage))
 
