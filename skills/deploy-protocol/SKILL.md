@@ -5,9 +5,9 @@ description: Enforce the DEPLOY.md deployment-debt protocol when writing one-off
 
 # Deployment-debt protocol
 
-You are working in a customer deployment repo. Any one-off code written here is **deployment debt** and must be logged in DEPLOY.md in the same commit. Follow this protocol whenever you are about to write (or have just written) a workaround, glue script, patch, or manual fix that exists because of this customer's environment.
+You are working in a customer deployment repo. Any one-off code written here is **deployment debt** and must be logged in DEPLOY.md as soon as it exists. Follow this protocol whenever you are about to write (or have just written) a workaround, glue script, patch, or manual fix that exists because of this customer's environment.
 
-## Before writing the workaround
+## The protocol
 
 1. **Verify existing capabilities first.** Search this repo and the core
    platform for an existing function, integration, or config flag that already
@@ -15,16 +15,8 @@ You are working in a customer deployment repo. Any one-off code written here is 
    capability exists but was hard to find, that's a documentation gap - log it
    as debt anyway.
 
-## If you must write it
-
-2. **Isolate it on a labeled branch.** Create a branch named
-   `deploy/<customer>/<short-slug>` (one hack per branch) and commit the
-   workaround there - never to the main branch, never left uncommitted. If
-   you don't know the customer slug, ask.
-
-3. **Log it in DEPLOY.md, same commit.** Append an entry to the Debt Log in
-   the repo's `DEPLOY.md` following the entry template there. The entry must
-   answer:
+2. **Log it in DEPLOY.md.** Append an entry to the Debt Log in the repo's
+   `DEPLOY.md` following the entry template there. The entry must answer:
    - why the workaround was necessary,
    - which customer system it touches (ask the user for its update cadence if unknown),
    - why the core platform couldn't handle it natively,
@@ -40,7 +32,7 @@ before proceeding.
 ## Rules of thumb
 
 - A five-minute fix still gets a log entry.
-- Never write customer-private data into the log, commit messages, or branch
-  names. When in doubt, describe the shape of the data, not the data.
+- Never write customer-private data into the log or any commit messages.
+  When in doubt, describe the shape of the data, not the data.
 - If the user asks you to skip the protocol, do it, but note the unlogged
   debt at the end of your response so it isn't silently lost.

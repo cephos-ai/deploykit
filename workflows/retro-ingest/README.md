@@ -3,7 +3,7 @@
 A [daily deployment retro](../../protocols/RETRO.md) goes in; every issue in
 it comes out the other side of the
 [triage core](../_shared/issue-triage) - deduplicated against Linear at the
-root-cause level, +1'd or filed. Retros feed the same triage core as Slack reports; matches land on the same ticket. Day 3's retro re-reporting Day 1's OCR bug lands as
+root-cause level, +1'd or filed. Day 3's retro re-reporting Day 1's OCR bug lands as
 a second +1 on the same ticket, not a duplicate.
 
 What gets extracted:

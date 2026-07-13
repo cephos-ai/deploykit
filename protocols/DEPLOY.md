@@ -6,9 +6,7 @@
 > [`skills/deploy-protocol`](https://github.com/cephos-ai/deploykit/tree/main/skills/deploy-protocol)
 > so the rules are enforced automatically.
 
-**Deployment debt** is the pile of one-off scripts, undocumented customer
-constraints, tribal knowledge, and manual fixes that accumulates during an
-implementation. Uncaptured, it disappears when the engineer leaves the site and gets rediscovered at the next installation.
+**Deployment debt** is the pile of one-off scripts, undocumented customer constraints, tribal knowledge, and manual fixes that accumulates during an implementation and gets rediscovered at the next customer if it isn't logged.
 
 ## The protocol
 

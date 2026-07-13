@@ -38,7 +38,7 @@ Whichever mode, walk these in order:
 1. **Deployment**: customer, today's date, checkpoint (day N of ~M, or
    milestone name, or end-of-deployment), contributors, anything new about
    the environment.
-2. **What worked today** - things worth repeating tomorrow. Small wins count.
+2. **What worked today**.
 3. **Debt verdicts**: walk each new `_pending_` Debt Log entry - promote /
    keep / delete, with an owner for every promotion.
 4. **Issues seen today**: for each distinct problem, capture: one-line

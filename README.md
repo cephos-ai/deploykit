@@ -27,7 +27,7 @@ That `3× (acme, globex)` is three separate reports about the same root cause, f
 | [`workflows/retro-ingest`](workflows/retro-ingest) | Retro in (form, webhook, or git push) → every issue triaged into Linear | n8n workflow |
 | [`workflows/_shared/issue-triage`](workflows/_shared/issue-triage) | The core both inlets call: extract → sanitize → dedup → +1 or create | n8n sub-workflow |
 | [`workflows/occurrence-digest`](workflows/occurrence-digest) | Weekly top-recurring-issues digest → Slack | n8n workflow |
-| [`protocols/DEPLOY.md`](protocols/DEPLOY.md) | Deployment-debt protocol: verify first, isolate hacks to labeled branches, log why | Markdown template |
+| [`protocols/DEPLOY.md`](protocols/DEPLOY.md) | Deployment-debt protocol: verify first, log every workaround with sanitized context | Markdown template |
 | [`protocols/RETRO.md`](protocols/RETRO.md) | Daily deployment retro: what worked today, debt verdicts, machine-ingestable issues | Markdown template |
 | [`checklists/pre-deployment.md`](checklists/pre-deployment.md) | Before you arrive / day one / before you leave | Markdown checklist |
 | [`skills/deploy-protocol`](skills/deploy-protocol) | Claude Code / Cursor enforce the DEPLOY.md protocol while you hack on-site | Agent skill + rules |
@@ -52,7 +52,7 @@ A ticket appears in Linear with an `[occurrence]` comment. Run it again: the sec
 
 **Just the paper (~2 min).** Copy [`DEPLOY.md`](protocols/DEPLOY.md), [`RETRO.md`](protocols/RETRO.md), and the [checklist](checklists/pre-deployment.md) into your deployment repo. Fork mercilessly.
 
-**Agent-native FDEs.** Drop [`skills/deploy-protocol`](skills/deploy-protocol) into `.claude/skills/` so workarounds get isolated and logged automatically, and [`skills/retro`](skills/retro) so the retro happens at the end of each day (interview one engineer or paste the standup notes; it POSTs straight into [`retro-ingest`](workflows/retro-ingest)).
+**Agent-native FDEs.** Drop [`skills/deploy-protocol`](skills/deploy-protocol) into `.claude/skills/` so workarounds get logged automatically, and [`skills/retro`](skills/retro) so the retro happens at the end of each day (interview one engineer or paste the standup notes; it POSTs straight into [`retro-ingest`](workflows/retro-ingest)).
 
 ## How the pieces connect
 
@@ -71,7 +71,7 @@ A retro finding and a live Slack report about the same root cause land on the sa
 
 ## Contributing
 
-Deployment war stories welcome. If you built a workaround twice, someone else needs it: PR a workflow, checklist, or skill, or open an issue describing the failure mode you keep hitting.
+If you built a workaround twice, someone else needs it: PR a workflow, checklist, or skill, or open an issue describing the failure mode you keep hitting.
 
 ## Why this exists
 
