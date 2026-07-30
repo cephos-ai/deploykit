@@ -1,8 +1,8 @@
-# retro-ingest
+# retro
 
-A [daily deployment retro](../../protocols/RETRO.md) goes in; every issue in
+A [daily deployment retro](../../../protocols/RETRO.md) goes in; every issue in
 it comes out the other side of the
-[triage core](../_shared/issue-triage) - deduplicated against Linear at the
+[triage core](../../_shared/issue-triage) - deduplicated against Linear at the
 root-cause level, +1'd or filed. Day 3's retro re-reporting Day 1's OCR bug lands as
 a second +1 on the same ticket, not a duplicate.
 
@@ -16,13 +16,13 @@ What gets extracted:
 | Door | Effort | When to use |
 |---|---|---|
 | **Form** | zero - open the Retro Form node's URL and paste | daily retros written in Docs/Notion, or a paste right after a standup |
-| **Webhook** | zero - `POST { customer, retro_markdown }` | the [`/retro` skill](../../skills/retro) submits here automatically |
+| **Webhook** | zero - `POST { customer, retro_markdown }` | the [`/retro` skill](../../../skills/retro) submits here automatically |
 | **GitHub push** | pick owner/repo + GitHub credential | retros committed to `retros/*.md` in your deployment repo trigger the workflow on push |
 
 All three converge on the same normalization step; use whichever fits how
 your retros actually happen, or all of them at once.
 
-## Setup (~5 min, after the [triage core](../_shared/issue-triage))
+## Setup (~5 min, after the [triage core](../../_shared/issue-triage))
 
 1. Import `workflow.json`.
 2. Point **Run Issue Triage** at your imported *deploykit - issue triage (core)*.
@@ -40,5 +40,5 @@ your retros actually happen, or all of them at once.
   header from the skill's curl.
 - `times_seen` from the retro is carried into the ticket context but produces
   **one** occurrence comment per retro (a retro is one sighting event); the
-  weekly [digest](../occurrence-digest) counts sighting events, not raw
+  weekly [digest](../../outlets/occurrence-digest) counts sighting events, not raw
   frequency.

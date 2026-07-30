@@ -5,7 +5,7 @@ notes / a chat scroll / individual notes from multiple engineers - whatever
 your team actually does. Writes `retros/YYYY-MM-DD-<customer>.md` from the
 [RETRO.md template](https://github.com/cephos-ai/deploykit/blob/main/protocols/RETRO.md), updates Debt Log verdicts in
 `DEPLOY.md`, and - if you've wired up the
-[retro-ingest workflow](https://github.com/cephos-ai/deploykit/tree/main/workflows/retro-ingest) - submits the retro so
+[retro inlet](https://github.com/cephos-ai/deploykit/tree/main/workflows/inlets/retro) - submits the retro so
 every issue lands in Linear, deduplicated against what's already there
 (including yesterday's retro from the same customer).
 
@@ -22,7 +22,7 @@ milestone, or as the final wrap-up.
 ## Wiring it to the funnel (optional)
 
 Set the webhook URL from your imported
-[retro-ingest workflow](https://github.com/cephos-ai/deploykit/tree/main/workflows/retro-ingest):
+[retro inlet](https://github.com/cephos-ai/deploykit/tree/main/workflows/inlets/retro):
 
 ```bash
 export DEPLOYKIT_RETRO_WEBHOOK_URL="https://your-n8n/webhook/deploykit-retro"

@@ -17,8 +17,9 @@ occurrence comments.
 
 ## Input contract
 
-Callers (the [Slack inlet](../../slack-linear-triage), the
-[retro inlet](../../retro-ingest), or anything you build) pass:
+Callers (the [Slack inlet](../../inlets/slack), the
+[retro inlet](../../inlets/retro), the
+[observability inlet](../../inlets/observability), or anything you build) pass:
 
 | Field | Required | Notes |
 |---|---|---|
@@ -41,7 +42,7 @@ Linear comment that starts with the literal marker `[occurrence]`:
 ```
 
 Occurrences for a ticket = count of its `[occurrence]` comments. That's what
-the [weekly digest](../../occurrence-digest) aggregates.
+the [weekly digest](../../outlets/occurrence-digest) aggregates.
 
 ## Setup (~10 min, do this before the inlets)
 

@@ -1,8 +1,8 @@
-# slack-linear-triage
+# slack
 
 @mention a bot on any Slack message worth tracking. The workflow pulls the
 whole thread, sanitizes it, and runs it through the
-[triage core](../_shared/issue-triage): **+1** on the ticket with the same
+[triage core](../../_shared/issue-triage): **+1** on the ticket with the same
 root cause, or a **new ticket** if there isn't one. The bot replies in-thread
 with what it did:
 
@@ -11,7 +11,7 @@ with what it did:
 
 Use it when someone hits a bug on-site: mention the bot, keep working, the report is in Linear.
 
-## Setup (~10 min, after the [triage core](../_shared/issue-triage))
+## Setup (~10 min, after the [triage core](../../_shared/issue-triage))
 
 ### 1. Create the Slack app
 

@@ -1,0 +1,165 @@
+# deploykit - autofix action template
+#
+# Copy this file into your target repo as .github/workflows/deploykit-autofix.yml.
+# It listens for the `deploykit-autofix` repository_dispatch event emitted by
+# the deploykit autofix-dispatch n8n outlet (called by any inlet with structured
+# incident context, e.g. observability) and asks a cloud coding agent to open a
+# DRAFT pull request that includes `Fixes <linear_identifier>` in its body, so
+# Linear's GitHub integration auto-links the PR to the ticket.
+#
+# Reference agent: Cursor Cloud Agent (Background Agents).
+# Swap block for Claude Code Action / Claude Agent SDK is at the bottom.
+#
+# Required secrets on the target repo:
+#   CURSOR_API_KEY       Cursor → Settings → API Keys (needs Background Agents access)
+#   GITHUB_TOKEN         Provided by Actions automatically; needs `pull-requests: write`
+#
+# Repo variables (optional):
+#   DEPLOYKIT_BASE_BRANCH   base branch for the draft PR (default: main)
+
+name: deploykit autofix
+
+on:
+  repository_dispatch:
+    types: [deploykit-autofix]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  autofix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    concurrency:
+      # one autofix per Linear ticket at a time; queued extras get cancelled
+      group: deploykit-autofix-${{ github.event.client_payload.linear_identifier }}
+      cancel-in-progress: true
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Skip if PR already open for this ticket
+        id: check
+        env:
+          IDENT: ${{ github.event.client_payload.linear_identifier }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Look for an existing open PR whose body references this Linear ticket.
+          existing=$(gh pr list --state open --search "in:body $IDENT" --json number --jq 'length')
+          if [ "$existing" -gt 0 ]; then
+            echo "PR already open for $IDENT; skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build agent prompt
+        if: steps.check.outputs.skip == 'false'
+        id: prompt
+        env:
+          PAYLOAD: ${{ toJson(github.event.client_payload) }}
+        run: |
+          # Compose the prompt file the agent will consume.
+          # Kept small and factual: incident shape only, no ambient context.
+          jq -r '
+            "Incident from " + .incident.source + " (" + .incident.environment + ").\n" +
+            "Linear ticket: " + .linear_identifier + " - " + .linear_title + "\n" +
+            "URL: " + (.linear_issue_url // "n/a") + "\n\n" +
+            "Error: " + .incident.error_class + ": " + .incident.message + "\n" +
+            "Location: " + .incident.file + (if .incident.line then ":" + (.incident.line|tostring) else "" end) + "\n\n" +
+            "Stack (in-app frames only):\n" +
+            (.incident.stack_frames | map("  " + (.raw // ("at " + (.fn // "?") + " (" + (.file // "?") + ":" + ((.line // 0)|tostring) + ")"))) | join("\n")) + "\n"
+          ' <<< "$PAYLOAD" > /tmp/incident.txt
+
+          cat > /tmp/agent-prompt.md <<'EOF'
+          You are opening a **draft** pull request that attempts to fix the incident described below.
+
+          Before writing any code, decide: is this actually fixable by a code change in this repo?
+          - Yes  → make the smallest surgical change that resolves it. Add or update a test that
+                   would have caught the regression. Do NOT refactor unrelated code.
+          - No   → do NOT open a PR. Instead exit with a short explanation of why.
+
+          Requirements if you proceed:
+          - Branch name: `deploykit/autofix/<linear_identifier_lowercased>`
+          - PR must be a DRAFT.
+          - PR body MUST start with `Fixes <linear_identifier>` so Linear links it back.
+          - PR body must include: root-cause paragraph, the diff summary, and what tests you added.
+
+          Incident:
+          EOF
+          cat /tmp/incident.txt >> /tmp/agent-prompt.md
+
+      # ─────────────────────────────────────────────────────────────────────
+      # Cursor Cloud Agent (Background Agents) — reference implementation.
+      #
+      # NOTE: Cursor's Background Agents API is young. Verify the endpoint,
+      # request shape, and required fields against Cursor's current docs
+      # before relying on this in prod. Treat this block as a template, not
+      # a stable contract.
+      # ─────────────────────────────────────────────────────────────────────
+      - name: Trigger Cursor Cloud Agent
+        if: steps.check.outputs.skip == 'false'
+        env:
+          CURSOR_API_KEY: ${{ secrets.CURSOR_API_KEY }}
+          BASE_BRANCH: ${{ vars.DEPLOYKIT_BASE_BRANCH || 'main' }}
+          IDENT: ${{ github.event.client_payload.linear_identifier }}
+          REPO: ${{ github.repository }}
+        run: |
+          prompt=$(jq -Rs . < /tmp/agent-prompt.md)
+          branch="deploykit/autofix/$(echo "$IDENT" | tr '[:upper:]' '[:lower:]')"
+
+          curl -sS -f -X POST https://api.cursor.com/v0/agents \
+            -H "Authorization: Bearer $CURSOR_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d "{
+              \"prompt\": $prompt,
+              \"repository\": \"https://github.com/$REPO\",
+              \"branch\": \"$branch\",
+              \"base\": \"$BASE_BRANCH\",
+              \"draft_pr\": true
+            }"
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Swap block: use one of these instead of the Cursor step above.
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# --- Claude Code Action ---
+# Add secret: ANTHROPIC_API_KEY
+#
+#      - name: Run Claude Code
+#        if: steps.check.outputs.skip == 'false'
+#        uses: anthropics/claude-code-action@v1
+#        with:
+#          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+#          prompt_file: /tmp/agent-prompt.md
+#          base_branch: ${{ vars.DEPLOYKIT_BASE_BRANCH || 'main' }}
+#          create_draft_pr: true
+#
+# --- Claude Agent SDK (self-hosted, more control) ---
+# Add secret: ANTHROPIC_API_KEY. Requires Node/Python on the runner (ubuntu-latest ships both).
+#
+#      - name: Install Claude Agent SDK
+#        run: npm install -g @anthropic-ai/claude-agent-sdk
+#      - name: Run Claude Agent SDK
+#        if: steps.check.outputs.skip == 'false'
+#        env:
+#          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+#        run: |
+#          claude-agent run --prompt-file /tmp/agent-prompt.md \
+#            --allow-tool git,gh,file-write \
+#            --commit --draft-pr
+#
+# --- Shell claude -p (simplest, no wrapper) ---
+# Add secret: ANTHROPIC_API_KEY. Requires the Claude Code CLI installed on the runner.
+#
+#      - name: Install Claude Code CLI
+#        run: npm install -g @anthropic-ai/claude-code
+#      - name: Run claude -p
+#        if: steps.check.outputs.skip == 'false'
+#        env:
+#          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+#        run: |
+#          claude -p "$(cat /tmp/agent-prompt.md)" --allow-tool git,gh,file-write

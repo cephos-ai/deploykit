@@ -1,0 +1,174 @@
+{
+  "id": "5a5b7c8d9e0f1a2b",
+  "name": "deploykit - autofix dispatch",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## deploykit - autofix dispatch\n\nOptional post-triage sub-workflow. Called by any inlet that produced a NEW Linear ticket for a structured incident (Sentry, PagerDuty, or anything else with a stack trace) and wants a draft-PR autofix attempt.\n\nFires `repository_dispatch` at the configured target repo's GitHub Actions. The Action runs a cloud coding agent (Cursor Cloud Agent by default) and opens a **draft** PR whose body starts with `Fixes <linear_identifier>` so Linear's native GitHub integration links it back.\n\n**Input contract** (from caller):\n```\n{\n  linear_identifier: 'PLT-142',\n  linear_issue_url:  'https://linear.app/…',\n  linear_title:      'OCR fails on rotated scans',\n  incident: {\n    source, customer, error_class, message,\n    file, line, environment, stack_frames, incident_url\n  }\n}\n```\nReturns `{ dispatched: true, event_type, target_repo }`.\n\n**Setup:**\n1. **Config**: set `github_owner`, `github_repo`, and (optional) `event_type`.\n2. **GitHub Dispatch**: attach a GitHub credential with `repo` scope (repository_dispatch needs write on Actions).\n3. Copy `autofix-action-template.yml` into the target repo as `.github/workflows/deploykit-autofix.yml`; set its secrets.\n4. From the calling inlet, flip `autofix_enabled=true` and point its *Trigger Autofix* node at this workflow.\n\nDon't run this standalone; import it, then have inlets call it.",
+        "height": 620,
+        "width": 500
+      },
+      "id": "55555555-5555-4555-8555-555555555500",
+      "name": "Setup Notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-60, -680]
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "55555555-5555-4555-8555-555555555501",
+      "name": "Autofix Input",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d0000000-0000-4000-8000-000000000001",
+              "name": "github_owner",
+              "value": "REPLACE_WITH_GITHUB_OWNER",
+              "type": "string"
+            },
+            {
+              "id": "d0000000-0000-4000-8000-000000000002",
+              "name": "github_repo",
+              "value": "REPLACE_WITH_GITHUB_REPO",
+              "type": "string"
+            },
+            {
+              "id": "d0000000-0000-4000-8000-000000000003",
+              "name": "event_type",
+              "value": "deploykit-autofix",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "55555555-5555-4555-8555-555555555502",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [220, 0]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.github.com/repos/{{ $('Config').first().json.github_owner }}/{{ $('Config').first().json.github_repo }}/dispatches",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/vnd.github+json"
+            },
+            {
+              "name": "X-GitHub-Api-Version",
+              "value": "2022-11-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"event_type\": {{ JSON.stringify($('Config').first().json.event_type) }},\n  \"client_payload\": {\n    \"linear_identifier\": {{ JSON.stringify($json.linear_identifier) }},\n    \"linear_issue_url\": {{ JSON.stringify($json.linear_issue_url) }},\n    \"linear_title\": {{ JSON.stringify($json.linear_title) }},\n    \"incident\": {{ JSON.stringify($json.incident) }}\n  }\n}",
+        "options": {}
+      },
+      "id": "55555555-5555-4555-8555-555555555503",
+      "name": "GitHub Dispatch",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [460, 0],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1000,
+      "credentials": {
+        "githubApi": {
+          "id": "CONFIGURE_ME",
+          "name": "GitHub account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d0000000-0000-4000-8000-000000000010",
+              "name": "dispatched",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "d0000000-0000-4000-8000-000000000011",
+              "name": "event_type",
+              "value": "={{ $('Config').first().json.event_type }}",
+              "type": "string"
+            },
+            {
+              "id": "d0000000-0000-4000-8000-000000000012",
+              "name": "target_repo",
+              "value": "={{ $('Config').first().json.github_owner + '/' + $('Config').first().json.github_repo }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "55555555-5555-4555-8555-555555555504",
+      "name": "Return Result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [700, 0]
+    }
+  ],
+  "connections": {
+    "Autofix Input": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "GitHub Dispatch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GitHub Dispatch": {
+      "main": [
+        [
+          {
+            "node": "Return Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

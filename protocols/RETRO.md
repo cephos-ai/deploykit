@@ -13,7 +13,7 @@
 > [`/retro` skill](https://github.com/cephos-ai/deploykit/tree/main/skills/retro)
 > to interview you (or ingest a paste of meeting notes), and/or feed the
 > finished file to the
-> [`retro-ingest` workflow](https://github.com/cephos-ai/deploykit/tree/main/workflows/retro-ingest)
+> [retro inlet](https://github.com/cephos-ai/deploykit/tree/main/workflows/inlets/retro)
 > so every issue below lands in your tracker automatically.
 
 ## Deployment
@@ -51,7 +51,7 @@ entry in `DEPLOY.md` first and tick `Sanitized?` = yes.
 
 <!--
 One block per distinct problem encountered today, including ones you worked
-around. Keep the structure: the retro-ingest workflow splits on "### Issue:"
+around. Keep the structure: the retro inlet splits on "### Issue:"
 headings and reads the fields. Sanitize context: describe the shape of the
 data, not the data - no customer names, IDs, private document contents,
 credentials.

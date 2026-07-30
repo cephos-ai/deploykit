@@ -31,7 +31,7 @@
 
 ### Instrumentation **[process]**
 - [ ] `DEPLOY.md` protocol file is in the deployment repo ([template](../protocols/DEPLOY.md))
-- [ ] Feedback capture is live: Slack triage bot or equivalent ([workflow](../workflows/slack-linear-triage))
+- [ ] Feedback capture is live: Slack triage bot or equivalent ([workflow](../workflows/inlets/slack))
 - [ ] Metrics baseline recorded: when does the clock start for time-to-production?
 
 ## Day one

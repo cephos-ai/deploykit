@@ -1,0 +1,352 @@
+{
+  "id": "4a4b7c8d9e0f1a2b",
+  "name": "deploykit - observability triage",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## deploykit - observability inlet\n\nSentry and PagerDuty webhooks land here. Each incident is shape-mapped (allowlist only), deduplicated by fingerprint, and triaged through the shared core into Linear. When `autofix_enabled=true` and the incident produces a **new** ticket, *Trigger Autofix* calls the `deploykit - autofix dispatch` outlet (import that workflow separately from `workflows/outlets/autofix-dispatch/`).\n\n**Setup:**\n1. Import the issue-triage core first, then point *Run Issue Triage* at it.\n2. **Config** node: `autofix_enabled` (leave `false` for the first end-to-end test).\n3. **Sentry**: your project → Alerts → create a webhook alert to this workflow's `deploykit-sentry` URL. Or a Sentry Issue Alert with the built-in Webhooks integration.\n4. **PagerDuty**: your service → Integrations → Generic Webhooks (v3) → subscribe `incident.triggered` to this workflow's `deploykit-pagerduty` URL.\n5. If `autofix_enabled=true`: import `outlets/autofix-dispatch/workflow.json` (with its own Config + GitHub credential) and point *Trigger Autofix* at it.\n6. Activate.\n\n**Customer slug:** derived from Sentry project or PagerDuty service name. Override with `?customer=acme` on either webhook URL if that doesn't match your channel naming.",
+        "height": 560,
+        "width": 500
+      },
+      "id": "44444444-4444-4444-8444-444444444400",
+      "name": "Setup Notes",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [-80, -620]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "deploykit-sentry",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "44444444-4444-4444-8444-444444444401",
+      "name": "Sentry Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, -40],
+      "webhookId": "deploykit-obs-sentry-44444444"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "deploykit-pagerduty",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "44444444-4444-4444-8444-444444444402",
+      "name": "PagerDuty Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 160],
+      "webhookId": "deploykit-obs-pagerduty-44444444"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Allowlist shape-map from raw webhook payload → canonical incident record.\n// We take only known-safe fields and drop everything else (no user emails,\n// no request bodies, no arbitrary tags). This is sanitization by construction.\n\nfunction pickSentry(body) {\n  const data = body.data || {};\n  const issue = data.issue || {};\n  const event = data.event || {};\n  const exc = (event.exception && event.exception.values && event.exception.values[0]) || {};\n  const frames = (exc.stacktrace && exc.stacktrace.frames) || [];\n\n  return {\n    fingerprint: issue.id || event.event_id || `sentry-${Date.now()}`,\n    error_class: exc.type || issue.type || 'Error',\n    message: exc.value || issue.title || issue.metadata?.value || '',\n    file: frames.length ? frames[frames.length - 1].filename : (issue.culprit || 'unknown'),\n    line: frames.length ? frames[frames.length - 1].lineno : null,\n    environment: event.environment || issue.project?.slug || 'unknown',\n    project: issue.project?.slug || issue.project?.name || 'unknown',\n    // top 5 in-app frames only (drop node_modules, vendor)\n    stack_frames: frames\n      .filter(f => f.in_app !== false)\n      .slice(-5)\n      .map(f => ({ file: f.filename, line: f.lineno, fn: f.function })),\n    occurrence_count: issue.count || 1,\n    incident_url: issue.web_url || issue.permalink || null,\n  };\n}\n\nfunction pickPagerDuty(body) {\n  const evt = body.event || {};\n  const data = evt.data || {};\n  const service = data.service || {};\n  const details = data.custom_details || {};\n\n  return {\n    fingerprint: data.dedup_key || data.id || `pd-${Date.now()}`,\n    error_class: details.class || data.type || 'Incident',\n    message: data.title || data.summary || details.summary || '',\n    file: details.file || 'unknown',\n    line: details.line || null,\n    environment: details.environment || 'unknown',\n    project: service.summary || service.name || 'unknown',\n    stack_frames: details.stack\n      ? String(details.stack).split('\\n').slice(0, 5).map(l => ({ raw: l.trim() }))\n      : [],\n    occurrence_count: details.occurrences || 1,\n    incident_url: data.html_url || null,\n  };\n}\n\nconst items = $input.all().map((item) => {\n  const raw = item.json;\n  const body = raw.body || raw;\n  const query = raw.query || {};\n  const isSentry = !!(body.data && (body.data.issue || body.data.event));\n  const isPagerDuty = !!body.event;\n\n  if (!isSentry && !isPagerDuty) {\n    return null;\n  }\n\n  const source = isSentry ? 'sentry' : 'pagerduty';\n  const shaped = isSentry ? pickSentry(body) : pickPagerDuty(body);\n  const customer = query.customer || shaped.project || 'unknown';\n\n  return {\n    json: {\n      source,\n      customer,\n      ...shaped,\n      reported_at: new Date().toISOString(),\n    },\n  };\n}).filter(Boolean);\n\nreturn items;"
+      },
+      "id": "44444444-4444-4444-8444-444444444403",
+      "name": "Shape-Map",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [240, 60]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Fingerprint dedup with a rolling TTL. Sentry retries and PagerDuty escalations\n// fire the same incident multiple times; the core does root-cause dedup at the\n// Linear layer but that still burns LLM tokens. Cheaper to short-circuit here.\n\nconst TTL_MS = 60 * 60 * 1000; // 1h\nconst store = $getWorkflowStaticData('global');\nstore.seen = store.seen || {};\n\nconst now = Date.now();\n// purge expired\nfor (const k of Object.keys(store.seen)) {\n  if (store.seen[k] < now) delete store.seen[k];\n}\n\nconst passed = [];\nfor (const item of $input.all()) {\n  const key = `${item.json.source}:${item.json.fingerprint}`;\n  if (store.seen[key]) continue;\n  store.seen[key] = now + TTL_MS;\n  passed.push(item);\n}\n\nreturn passed;"
+      },
+      "id": "44444444-4444-4444-8444-444444444404",
+      "name": "Fingerprint Dedup",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 60]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e0000000-0000-4000-8000-000000000003",
+              "name": "autofix_enabled",
+              "value": false,
+              "type": "boolean"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "44444444-4444-4444-8444-444444444405",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [680, 60]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e0000000-0000-4000-8000-000000000010",
+              "name": "source",
+              "value": "={{ $json.source }}",
+              "type": "string"
+            },
+            {
+              "id": "e0000000-0000-4000-8000-000000000011",
+              "name": "customer",
+              "value": "={{ $json.customer }}",
+              "type": "string"
+            },
+            {
+              "id": "e0000000-0000-4000-8000-000000000012",
+              "name": "raw_text",
+              "value": "={{ 'Observability incident from ' + $json.source + '\\nError: ' + $json.error_class + ': ' + $json.message + '\\nLocation: ' + $json.file + ($json.line ? ':' + $json.line : '') + '\\nEnvironment: ' + $json.environment + '\\nOccurrences: ' + $json.occurrence_count + '\\nIn-app stack:\\n' + $json.stack_frames.map(f => f.raw ? f.raw : '  at ' + (f.fn || '?') + ' (' + f.file + ':' + (f.line || '?') + ')').join('\\n') + ($json.incident_url ? '\\nSource: ' + $json.incident_url : '') }}",
+              "type": "string"
+            },
+            {
+              "id": "e0000000-0000-4000-8000-000000000013",
+              "name": "reported_at",
+              "value": "={{ $json.reported_at }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "id": "44444444-4444-4444-8444-444444444406",
+      "name": "Build Triage Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [900, 60]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "",
+          "cachedResultName": "deploykit - issue triage (core)"
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "44444444-4444-4444-8444-444444444407",
+      "name": "Run Issue Triage",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [1120, 60],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose"
+          },
+          "conditions": [
+            {
+              "id": "f0000000-0000-4000-8000-000000000001",
+              "leftValue": "={{ $('Config').first().json.autofix_enabled }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "f0000000-0000-4000-8000-000000000002",
+              "leftValue": "={{ $json.action }}",
+              "rightValue": "created",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "44444444-4444-4444-8444-444444444408",
+      "name": "Should Autofix?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [1340, 60]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e0000000-0000-4000-8000-000000000020",
+              "name": "linear_identifier",
+              "value": "={{ $json.identifier }}",
+              "type": "string"
+            },
+            {
+              "id": "e0000000-0000-4000-8000-000000000021",
+              "name": "linear_issue_url",
+              "value": "={{ $json.issue_url }}",
+              "type": "string"
+            },
+            {
+              "id": "e0000000-0000-4000-8000-000000000022",
+              "name": "linear_title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "e0000000-0000-4000-8000-000000000023",
+              "name": "incident",
+              "value": "={{ {\n  source: $('Build Triage Payload').item.json.source,\n  customer: $('Build Triage Payload').item.json.customer,\n  error_class: $('Shape-Map').item.json.error_class,\n  message: $('Shape-Map').item.json.message,\n  file: $('Shape-Map').item.json.file,\n  line: $('Shape-Map').item.json.line,\n  environment: $('Shape-Map').item.json.environment,\n  stack_frames: $('Shape-Map').item.json.stack_frames,\n  incident_url: $('Shape-Map').item.json.incident_url\n} }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "44444444-4444-4444-8444-444444444409",
+      "name": "Build Autofix Payload",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1580, -20]
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "",
+          "cachedResultName": "deploykit - autofix dispatch"
+        },
+        "mode": "each",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "id": "44444444-4444-4444-8444-44444444440a",
+      "name": "Trigger Autofix",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [1800, -20],
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Sentry Webhook": {
+      "main": [
+        [
+          {
+            "node": "Shape-Map",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "PagerDuty Webhook": {
+      "main": [
+        [
+          {
+            "node": "Shape-Map",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Shape-Map": {
+      "main": [
+        [
+          {
+            "node": "Fingerprint Dedup",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fingerprint Dedup": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Build Triage Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Triage Payload": {
+      "main": [
+        [
+          {
+            "node": "Run Issue Triage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Issue Triage": {
+      "main": [
+        [
+          {
+            "node": "Should Autofix?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Autofix?": {
+      "main": [
+        [
+          {
+            "node": "Build Autofix Payload",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Build Autofix Payload": {
+      "main": [
+        [
+          {
+            "node": "Trigger Autofix",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

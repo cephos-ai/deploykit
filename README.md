@@ -23,10 +23,12 @@ That `3× (acme, globex)` is three separate reports about the same root cause, f
 
 | Artifact | What it does | Format |
 |---|---|---|
-| [`workflows/slack-linear-triage`](workflows/slack-linear-triage) | @mention a bot → thread is sanitized and triaged into Linear | n8n workflow |
-| [`workflows/retro-ingest`](workflows/retro-ingest) | Retro in (form, webhook, or git push) → every issue triaged into Linear | n8n workflow |
-| [`workflows/_shared/issue-triage`](workflows/_shared/issue-triage) | The core both inlets call: extract → sanitize → dedup → +1 or create | n8n sub-workflow |
-| [`workflows/occurrence-digest`](workflows/occurrence-digest) | Weekly top-recurring-issues digest → Slack | n8n workflow |
+| [`workflows/inlets/slack`](workflows/inlets/slack) | @mention a bot → thread is sanitized and triaged into Linear | n8n inlet |
+| [`workflows/inlets/retro`](workflows/inlets/retro) | Retro in (form, webhook, or git push) → every issue triaged into Linear | n8n inlet |
+| [`workflows/inlets/observability`](workflows/inlets/observability) | Sentry / PagerDuty incident → triaged into Linear, optionally hands off to autofix-dispatch | n8n inlet |
+| [`workflows/_shared/issue-triage`](workflows/_shared/issue-triage) | The core all inlets call: extract → sanitize → dedup → +1 or create | n8n sub-workflow |
+| [`workflows/outlets/autofix-dispatch`](workflows/outlets/autofix-dispatch) | Optional. New ticket → `repository_dispatch` → draft PR via Cursor Cloud Agent (or Claude Code / Claude Agent SDK) | n8n outlet + GitHub Action template |
+| [`workflows/outlets/occurrence-digest`](workflows/outlets/occurrence-digest) | Weekly top-recurring-issues digest → Slack | n8n outlet |
 | [`protocols/DEPLOY.md`](protocols/DEPLOY.md) | Deployment-debt protocol: verify first, log every workaround with sanitized context | Markdown template |
 | [`protocols/RETRO.md`](protocols/RETRO.md) | Daily deployment retro: what worked today, debt verdicts, machine-ingestable issues | Markdown template |
 | [`checklists/pre-deployment.md`](checklists/pre-deployment.md) | Before you arrive / day one / before you leave | Markdown checklist |
@@ -37,7 +39,7 @@ Ships against Slack + Linear + OpenAI on n8n. Every integration point is a singl
 
 ## Quickstart: pick your door
 
-**The feedback funnel (~20 min).** Import [`issue-triage`](workflows/_shared/issue-triage) (the core), then [`slack-linear-triage`](workflows/slack-linear-triage), [`retro-ingest`](workflows/retro-ingest), and [`occurrence-digest`](workflows/occurrence-digest). Connect Slack, Linear, and an LLM credential (each folder's README has the steps). Then prove it end to end:
+**The feedback funnel (~20 min).** Import [`issue-triage`](workflows/_shared/issue-triage) (the core), then the inlets you want ([`slack`](workflows/inlets/slack), [`retro`](workflows/inlets/retro), [`observability`](workflows/inlets/observability)), and the outlets ([`occurrence-digest`](workflows/outlets/occurrence-digest), plus [`autofix-dispatch`](workflows/outlets/autofix-dispatch) if you want draft-PR autofix). Connect Slack, Linear, and an LLM credential (each folder's README has the steps). Then prove it end to end:
 
 ```bash
 curl -X POST https://your-n8n/webhook/deploykit-retro \
@@ -52,19 +54,24 @@ A ticket appears in Linear with an `[occurrence]` comment. Run it again: the sec
 
 **Just the paper (~2 min).** Copy [`DEPLOY.md`](protocols/DEPLOY.md), [`RETRO.md`](protocols/RETRO.md), and the [checklist](checklists/pre-deployment.md) into your deployment repo. Fork mercilessly.
 
-**For FDEs using Claude Code / Cursor.** Drop [`skills/deploy-protocol`](skills/deploy-protocol) into `.claude/skills/` so workarounds get logged automatically, and [`skills/retro`](skills/retro) so the retro happens at the end of each day (interview one engineer or paste the standup notes; it POSTs straight into [`retro-ingest`](workflows/retro-ingest)).
+**For FDEs using Claude Code / Cursor.** Drop [`skills/deploy-protocol`](skills/deploy-protocol) into `.claude/skills/` so workarounds get logged automatically, and [`skills/retro`](skills/retro) so the retro happens at the end of each day (interview one engineer or paste the standup notes; it POSTs straight into the [retro inlet](workflows/inlets/retro)).
 
 ## How the pieces connect
 
 ```mermaid
 flowchart LR
-    slack["Slack @mention"] --> core
-    skill["/retro skill"] --> retro["retro-ingest"]
-    form["form / git push"] --> retro
-    retro --> core["issue-triage core"]
+    slack["Slack @mention"] --> slackInlet["inlets/slack"]
+    skill["/retro skill"] --> retroInlet["inlets/retro"]
+    form["form / git push"] --> retroInlet
+    sentry["Sentry / PagerDuty"] --> obs["inlets/observability"]
+    slackInlet --> core["_shared/issue-triage"]
+    retroInlet --> core
+    obs --> core
     core -->|same root cause| occ["+1 occurrence comment"]
     core -->|new root cause| new["new Linear ticket"]
-    occ & new --> digest["weekly digest → Slack"]
+    new -.->|autofix opt-in| autofix["outlets/autofix-dispatch"]
+    autofix --> pr["draft PR via cloud coding agent"]
+    occ & new --> digest["outlets/occurrence-digest → Slack"]
 ```
 
 A retro finding and a live Slack report about the same root cause land on the same ticket.

@@ -1,7 +1,7 @@
 # occurrence-digest
 
 Every Monday at 09:00, this workflow counts the `[occurrence]` comments the
-[triage core](../_shared/issue-triage) filed over the past week, ranks issues
+[triage core](../../_shared/issue-triage) filed over the past week, ranks issues
 by recurrence, and posts the top 10 to a Slack channel:
 
 > :repeat: **Top recurring deployment issues - week of 2026-07-06**
@@ -31,4 +31,4 @@ Quiet week, no `[occurrence]` comments → no post.
   ranking globally.
 - **On Linear Business+:** native Customer Requests give you sortable request
   counts inside Linear itself, making this digest optional - see the
-  [core README](../_shared/issue-triage/README.md#design-decisions-change-them-if-you-disagree).
+  [core README](../../_shared/issue-triage/README.md#design-decisions-change-them-if-you-disagree).

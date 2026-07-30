@@ -6,7 +6,7 @@ deploykit is an open-source kit for deployment engineering: protocols, workflows
 
 - `protocols/`: DEPLOY.md and RETRO.md templates. Markdown, meant to be copied into a customer deployment repo and forked.
 - `checklists/`: pre-deployment checklist mapped to the essay's five risk categories.
-- `workflows/`: n8n workflow exports. Slack to Linear triage, retro ingest, occurrence digest, plus a shared `_shared/issue-triage` sub-workflow.
+- `workflows/`: n8n workflow exports. `inlets/` (slack, retro, observability), `_shared/issue-triage` (the core), and `outlets/` (occurrence-digest, autofix-dispatch).
 - `skills/`: Claude Code and Cursor agent skills. `deploy-protocol` enforces DEPLOY.md; `retro` runs the retrospective interview.
 
 ## Writing conventions
@@ -37,4 +37,4 @@ The README's job, in order: does this fit my stack, what will I see when it work
 
 1. It has to be useful standalone (design principle #1).
 2. Add a row to the artifact table in the README with the file path, a one-line "what it does," and the format.
-3. If it is a workflow, add a setup section to `workflows/_shared/issue-triage/README.md` or a sibling README.
+3. If it is a workflow, add it under `workflows/inlets/` or `workflows/outlets/` (whichever fits), and add a setup section to `workflows/_shared/issue-triage/README.md` or the new folder's own README.

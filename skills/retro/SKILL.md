@@ -1,6 +1,6 @@
 ---
 name: retro
-description: Run a daily deployment retrospective. Use when the user says /retro, finishes a day of a deployment, hits a checkpoint or milestone, or asks to write a deployment retro. Accepts either an interview with one engineer or a paste of meeting notes / a chat scroll / individual notes from multiple engineers. Writes the retro file and optionally submits it to the retro-ingest workflow.
+description: Run a daily deployment retrospective. Use when the user says /retro, finishes a day of a deployment, hits a checkpoint or milestone, or asks to write a deployment retro. Accepts either an interview with one engineer or a paste of meeting notes / a chat scroll / individual notes from multiple engineers. Writes the retro file and optionally submits it to the retro inlet workflow.
 ---
 
 # Deployment retro interviewer
@@ -57,8 +57,7 @@ in `DEPLOY.md` to match what was decided.
 ## Step 5 - submit to the feedback funnel
 
 If the environment variable `DEPLOYKIT_RETRO_WEBHOOK_URL` is set (or the user
-provides a webhook URL), offer to submit the retro to the retro-ingest
-workflow:
+provides a webhook URL), offer to submit the retro to the retro inlet:
 
 ```bash
 curl -X POST "$DEPLOYKIT_RETRO_WEBHOOK_URL" \
